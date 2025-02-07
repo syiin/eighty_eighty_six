@@ -28,10 +28,6 @@ int main(int argc, char *argv[]) {
 	while (decoder->pos < bin_size){
 		strcpy(output_buf, "");
 
-		//HANDLE OP BYTE
-		set_op_code(decoder);
-		set_modrm(decoder);
-
 		parse_instruction(decoder, output_buf);
 		printf("%s\n", output_buf);
 	}
