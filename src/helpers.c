@@ -194,7 +194,7 @@ void handle_mod_10(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char
 }
 
 void advance_decoder(decoder_t *decoder){
-	print_position(decoder->bin_buffer, decoder->pos);
+	/*print_position(decoder->bin_buffer, decoder->pos);*/
 	decoder->pos++;
 }
 
