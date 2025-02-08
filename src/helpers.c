@@ -27,38 +27,31 @@ void mov_regm_to_reg(decoder_t *decoder, char *output_buf){
 
 	byte = decoder->bin_buffer[decoder->pos];
 	uint8_t mod = byte >> 6;
-	uint8_t regm = (byte >> 3) & 0b111;
-	uint8_t reg = byte & 0b111;
+	uint8_t reg = (byte >> 3) & 0b111;
+	uint8_t regm = byte & 0b111;
 	switch (mod){
 		case 0b11: {
 			snprintf(output_buf + strlen(output_buf), 
 				BUFSIZ - strlen(output_buf),
 				"mov %s, %s",
-				reg_to_string(reg, w_bit),
-				reg_to_string(regm, w_bit));
+				reg_to_string(regm, w_bit),
+				reg_to_string(reg, w_bit));
 			break;
 		}
 		case 0b00: {
 			if (regm == 0b110){
 				//TODO: Direct address translation exception
 			}
-			if (d_bit){
-				snprintf(output_buf + strlen(output_buf), 
-					BUFSIZ - strlen(output_buf),
-					"mov %s, %s",
-					reg_to_string(reg, w_bit),
-					double_zero_regm_to_addr(regm));
-			} else {
-				snprintf(output_buf + strlen(output_buf), 
-					BUFSIZ - strlen(output_buf),
-					"mov %s, %s",
-					double_zero_regm_to_addr(reg),
-					reg_to_string(regm, w_bit));
+			handle_mod_00(d_bit, w_bit, reg, regm, output_buf);
+			break;
 			}
+		case 0b01: {
+			handle_mod_01(d_bit, w_bit, reg, regm, output_buf, decoder);
 			break;
 		}
-		case 0b01: {
-
+		case 0b10: {
+			handle_mod_10(d_bit, w_bit, reg, regm, output_buf, decoder);
+			break;
 		}
 	}
 }
@@ -120,18 +113,84 @@ char *reg_to_string(int reg, int is_16_bit) {
 }
 
 
-char *double_zero_regm_to_addr(int regm) {
+char *regm_to_addr(int regm) {
 	switch (regm) {
-		case 0b000: return  "[bx + si]";
-		case 0b001: return  "[bx + di]";
-		case 0b010: return  "[bp + si]";
-		case 0b011: return  "[bp + di]";
-		case 0b100: return  "[si]";
-		case 0b101: return  "[di]";
-		case 0b110: return "110 PASSED WRONG";
-		case 0b111: return  "[bi]";
+		case 0b000: return  "bx + si";
+		case 0b001: return  "bx + di";
+		case 0b010: return  "bp + si";
+		case 0b011: return  "bp + di";
+		case 0b100: return  "si";
+		case 0b101: return  "di";
+		case 0b110: return "bp";
+		case 0b111: return  "bi";
 		default: return "ILLEGAL_REG";
 	}
+}
+
+void handle_mod_00(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char *output_buf){
+	if (d_bit){
+		snprintf(output_buf + strlen(output_buf), 
+			BUFSIZ - strlen(output_buf),
+			"mov %s, [%s]",
+			reg_to_string(reg, w_bit),
+			regm_to_addr(regm));
+	} else {
+		snprintf(output_buf + strlen(output_buf), 
+			BUFSIZ - strlen(output_buf),
+			"mov [%s], %s",
+			regm_to_addr(regm),
+			reg_to_string(reg, w_bit));
+	}
+}
+
+
+void handle_mod_01(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char *output_buf, decoder_t *decoder){
+
+	advance_decoder(decoder);
+
+	uint8_t byte = decoder->bin_buffer[decoder->pos];
+	if (d_bit){
+		snprintf(output_buf + strlen(output_buf), 
+			BUFSIZ - strlen(output_buf),
+			"mov %s, [%s + %u]",
+			reg_to_string(reg, w_bit),
+			regm_to_addr(regm),
+			byte);
+	} else {
+		snprintf(output_buf + strlen(output_buf), 
+			BUFSIZ - strlen(output_buf),
+			"mov [%s + %u], %s",
+			regm_to_addr(regm),
+			byte,
+			reg_to_string(reg, w_bit)
+			);
+	}
+}
+
+
+void handle_mod_10(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char *output_buf, decoder_t *decoder){
+	char *dst;
+	char *src;
+	if (d_bit){
+		dst = reg_to_string(reg, w_bit);
+		src = regm_to_addr(regm);
+	} else {
+		dst = regm_to_addr(reg);
+		src = reg_to_string(regm, w_bit);
+	}
+
+	advance_decoder(decoder);
+	uint8_t first_byte = decoder->bin_buffer[decoder->pos];
+	advance_decoder(decoder);
+	uint8_t second_byte = decoder->bin_buffer[decoder->pos];
+
+	uint16_t concat_byte = (second_byte << 8) | first_byte;
+	snprintf(output_buf + strlen(output_buf), 
+		BUFSIZ - strlen(output_buf),
+		"mov %s, [%s + %u]",
+		dst,
+		src,
+		concat_byte);
 }
 
 void advance_decoder(decoder_t *decoder){
