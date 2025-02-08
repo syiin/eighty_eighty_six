@@ -15,7 +15,7 @@ void parse_instruction(decoder_t *decoder, char *output_buf){
 			mov_regm_to_reg(decoder, output_buf);
 		}
 	}
-	decoder->pos++;
+	advance_decoder(decoder);
 }
 
 void mov_regm_to_reg(decoder_t *decoder, char *output_buf){
@@ -23,19 +23,42 @@ void mov_regm_to_reg(decoder_t *decoder, char *output_buf){
 	uint8_t d_bit = byte & 0b10;
 	uint8_t w_bit = byte & 0b01;
 
-	decoder->pos++;
+	advance_decoder(decoder);
 
 	byte = decoder->bin_buffer[decoder->pos];
 	uint8_t mod = byte >> 6;
+	uint8_t regm = (byte >> 3) & 0b111;
+	uint8_t reg = byte & 0b111;
 	switch (mod){
 		case 0b11: {
-			uint8_t regm = (byte >> 3) & 0b111;
-			uint8_t reg = byte & 0b111;
-			strcat(output_buf, "mov ");
-			strcat(output_buf, reg_to_string(reg, w_bit));
-			strcat(output_buf, ", ");
-			strcat(output_buf, reg_to_string(regm, w_bit));
+			snprintf(output_buf + strlen(output_buf), 
+				BUFSIZ - strlen(output_buf),
+				"mov %s, %s",
+				reg_to_string(reg, w_bit),
+				reg_to_string(regm, w_bit));
 			break;
+		}
+		case 0b00: {
+			if (regm == 0b110){
+				//TODO: Direct address translation exception
+			}
+			if (d_bit){
+				snprintf(output_buf + strlen(output_buf), 
+					BUFSIZ - strlen(output_buf),
+					"mov %s, %s",
+					reg_to_string(reg, w_bit),
+					double_zero_regm_to_addr(regm));
+			} else {
+				snprintf(output_buf + strlen(output_buf), 
+					BUFSIZ - strlen(output_buf),
+					"mov %s, %s",
+					double_zero_regm_to_addr(reg),
+					reg_to_string(regm, w_bit));
+			}
+			break;
+		}
+		case 0b01: {
+
 		}
 	}
 }
@@ -46,21 +69,18 @@ void mov_immed_to_reg(decoder_t *decoder, char *output_buf){
 	uint8_t reg = byte & 0b111;
 	uint16_t immed;
 
-	decoder->pos++;
+	advance_decoder(decoder);
 	byte = decoder->bin_buffer[decoder->pos];
 	if (w_bit == 1){
-		immed = (byte << 8) | decoder->bin_buffer[decoder->pos+1];
-		decoder->pos++;
+		immed = (decoder->bin_buffer[decoder->pos+1] << 8) | byte;
+		advance_decoder(decoder);
 	} else {
 		immed = byte;
 	}
-	strcat(output_buf, "mov ");
-	strcat(output_buf, reg_to_string(reg, w_bit));
-	strcat(output_buf, ", ");
-
-	char immed_str[50];
-	sprintf(immed_str, "[%u]", immed);
-	strcat(output_buf, immed_str);
+	snprintf(output_buf + strlen(output_buf),
+		BUFSIZ - strlen(output_buf),
+		"mov %s, %u",
+		reg_to_string(reg, w_bit), immed);
 }
 
 byte_t *read_binary_file(const char *file_path, size_t *bin_size){
@@ -85,16 +105,6 @@ byte_t *read_binary_file(const char *file_path, size_t *bin_size){
 	return bin_buffer;
 }
 
-
-char *op_code_to_string(int op_code){
-	switch (op_code){
-		case (0b100010):
-			return "mov";
-		default:
-			return "ILLEGAL OP";
-	}
-}
-
 char *reg_to_string(int reg, int is_16_bit) {
 	switch (reg) {
 		case 0b000: return is_16_bit ? "ax" : "al";
@@ -109,20 +119,39 @@ char *reg_to_string(int reg, int is_16_bit) {
 	}
 }
 
-// DEBUGGING PRINT FUNCTIONS
 
-void byte_to_binary(uint8_t byte, char* binary) {
-    for(int i = 7; i >= 0; i--) {
-        binary[7-i] = (byte & (1 << i)) ? '1' : '0';
-    }
-    binary[8] = '\0';
+char *double_zero_regm_to_addr(int regm) {
+	switch (regm) {
+		case 0b000: return  "[bx + si]";
+		case 0b001: return  "[bx + di]";
+		case 0b010: return  "[bp + si]";
+		case 0b011: return  "[bp + di]";
+		case 0b100: return  "[si]";
+		case 0b101: return  "[di]";
+		case 0b110: return "110 PASSED WRONG";
+		case 0b111: return  "[bi]";
+		default: return "ILLEGAL_REG";
+	}
 }
 
+void advance_decoder(decoder_t *decoder){
+	print_position(decoder->bin_buffer, decoder->pos);
+	decoder->pos++;
+}
 
-void print_position(byte_t *buffer, int pos){
+// DEBUGGING PRINT FUNCTIONS
+
+void print_position(const byte_t *buffer, int pos){
 	char bin_string[9];
 	byte_to_binary(buffer[pos], bin_string);
 	printf("%s\n", bin_string);
+}
+
+void byte_to_binary(uint8_t byte, char* binary) {
+	for(int i = 7; i >= 0; i--) {
+		binary[7-i] = (byte & (1 << i)) ? '1' : '0';
+	}
+	binary[8] = '\0';
 }
 
 void print_encoding_to_int(char *encoding){
