@@ -23,13 +23,12 @@ int main(int argc, char *argv[]) {
 	decoder_t *decoder = malloc(sizeof(decoder_t));
 	decoder->pos = 0;
 	decoder->bin_buffer = bin_buffer;
-	char output_buf[128];
+	/*char output_buf[128];*/
 
 	while (decoder->pos < bin_size){
-		strcpy(output_buf, "");
-
-		parse_instruction(decoder, output_buf);
-		printf("%s\n", output_buf);
+		strcpy(decoder->output_buf, "");
+		parse_instruction(decoder);
+		printf("%s\n", decoder->output_buf);
 	}
 
 	free(decoder);

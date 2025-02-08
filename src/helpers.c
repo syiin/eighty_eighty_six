@@ -4,21 +4,21 @@
 #include <string.h>
 #include "helpers.h"
 
-void parse_instruction(decoder_t *decoder, char *output_buf){
+void parse_instruction(decoder_t *decoder){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	if(byte >> 4 == 0b1011){
-		mov_immed_to_reg(decoder, output_buf);
+		mov_immed_to_reg(decoder);
 	}
 
 	switch(byte >> 2){
 		case 0b100010:{
-			mov_regm_to_reg(decoder, output_buf);
+			mov_regm_to_reg(decoder);
 		}
 	}
 	advance_decoder(decoder);
 }
 
-void mov_regm_to_reg(decoder_t *decoder, char *output_buf){
+void mov_regm_to_reg(decoder_t *decoder){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	uint8_t d_bit = byte & 0b10;
 	uint8_t w_bit = byte & 0b01;
@@ -31,8 +31,8 @@ void mov_regm_to_reg(decoder_t *decoder, char *output_buf){
 	uint8_t regm = byte & 0b111;
 	switch (mod){
 		case 0b11: {
-			snprintf(output_buf + strlen(output_buf), 
-				BUFSIZ - strlen(output_buf),
+			snprintf(decoder->output_buf + strlen(decoder->output_buf), 
+				BUFSIZ - strlen(decoder->output_buf),
 				"mov %s, %s",
 				reg_to_string(regm, w_bit),
 				reg_to_string(reg, w_bit));
@@ -42,21 +42,21 @@ void mov_regm_to_reg(decoder_t *decoder, char *output_buf){
 			if (regm == 0b110){
 				//TODO: Direct address translation exception
 			}
-			handle_mod_00(d_bit, w_bit, reg, regm, output_buf);
+			handle_mod_00(d_bit, w_bit, reg, regm, decoder);
 			break;
 			}
 		case 0b01: {
-			handle_mod_01(d_bit, w_bit, reg, regm, output_buf, decoder);
+			handle_mod_01(d_bit, w_bit, reg, regm, decoder);
 			break;
 		}
 		case 0b10: {
-			handle_mod_10(d_bit, w_bit, reg, regm, output_buf, decoder);
+			handle_mod_10(d_bit, w_bit, reg, regm, decoder);
 			break;
 		}
 	}
 }
 
-void mov_immed_to_reg(decoder_t *decoder, char *output_buf){
+void mov_immed_to_reg(decoder_t *decoder){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	uint8_t w_bit = (byte >> 3) & 0b1;
 	uint8_t reg = byte & 0b111;
@@ -70,8 +70,8 @@ void mov_immed_to_reg(decoder_t *decoder, char *output_buf){
 	} else {
 		immed = byte;
 	}
-	snprintf(output_buf + strlen(output_buf),
-		BUFSIZ - strlen(output_buf),
+	snprintf(decoder->output_buf + strlen(decoder->output_buf),
+		BUFSIZ - strlen(decoder->output_buf),
 		"mov %s, %u",
 		reg_to_string(reg, w_bit), immed);
 }
@@ -127,16 +127,16 @@ char *regm_to_addr(int regm) {
 	}
 }
 
-void handle_mod_00(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char *output_buf){
+void handle_mod_00(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, decoder_t *decoder){
 	if (d_bit){
-		snprintf(output_buf + strlen(output_buf), 
-			BUFSIZ - strlen(output_buf),
+		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
+			BUFSIZ - strlen(decoder->output_buf),
 			"mov %s, [%s]",
 			reg_to_string(reg, w_bit),
 			regm_to_addr(regm));
 	} else {
-		snprintf(output_buf + strlen(output_buf), 
-			BUFSIZ - strlen(output_buf),
+		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
+			BUFSIZ - strlen(decoder->output_buf),
 			"mov [%s], %s",
 			regm_to_addr(regm),
 			reg_to_string(reg, w_bit));
@@ -144,20 +144,20 @@ void handle_mod_00(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char
 }
 
 
-void handle_mod_01(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char *output_buf, decoder_t *decoder){
+void handle_mod_01(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, decoder_t *decoder){
 	advance_decoder(decoder);
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 
 	if (d_bit){
-		snprintf(output_buf + strlen(output_buf), 
-			BUFSIZ - strlen(output_buf),
+		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
+			BUFSIZ - strlen(decoder->output_buf),
 			"mov %s, [%s + %u]",
 			reg_to_string(reg, w_bit),
 			regm_to_addr(regm),
 			byte);
 	} else {
-		snprintf(output_buf + strlen(output_buf), 
-			BUFSIZ - strlen(output_buf),
+		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
+			BUFSIZ - strlen(decoder->output_buf),
 			"mov [%s + %u], %s",
 			regm_to_addr(regm),
 			byte,
@@ -167,7 +167,7 @@ void handle_mod_01(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char
 }
 
 
-void handle_mod_10(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char *output_buf, decoder_t *decoder){
+void handle_mod_10(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, decoder_t *decoder){
 	advance_decoder(decoder);
 	uint8_t first_byte = decoder->bin_buffer[decoder->pos];
 	advance_decoder(decoder);
@@ -175,15 +175,15 @@ void handle_mod_10(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char
 
 	uint16_t concat_byte = (second_byte << 8) | first_byte;
 	if (d_bit){
-		snprintf(output_buf + strlen(output_buf), 
-			BUFSIZ - strlen(output_buf),
+		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
+			BUFSIZ - strlen(decoder->output_buf),
 			"mov %s, [%s + %u]",
 			reg_to_string(reg, w_bit),
 			regm_to_addr(regm),
 			concat_byte);
 	} else {
-		snprintf(output_buf + strlen(output_buf), 
-			BUFSIZ - strlen(output_buf),
+		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
+			BUFSIZ - strlen(decoder->output_buf),
 			"mov [%s + %u], %s",
 			regm_to_addr(regm),
 			concat_byte,
