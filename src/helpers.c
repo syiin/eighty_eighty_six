@@ -145,10 +145,9 @@ void handle_mod_00(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char
 
 
 void handle_mod_01(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char *output_buf, decoder_t *decoder){
-
 	advance_decoder(decoder);
-
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
+
 	if (d_bit){
 		snprintf(output_buf + strlen(output_buf), 
 			BUFSIZ - strlen(output_buf),
@@ -169,28 +168,28 @@ void handle_mod_01(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char
 
 
 void handle_mod_10(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, char *output_buf, decoder_t *decoder){
-	char *dst;
-	char *src;
-	if (d_bit){
-		dst = reg_to_string(reg, w_bit);
-		src = regm_to_addr(regm);
-	} else {
-		dst = regm_to_addr(reg);
-		src = reg_to_string(regm, w_bit);
-	}
-
 	advance_decoder(decoder);
 	uint8_t first_byte = decoder->bin_buffer[decoder->pos];
 	advance_decoder(decoder);
 	uint8_t second_byte = decoder->bin_buffer[decoder->pos];
 
 	uint16_t concat_byte = (second_byte << 8) | first_byte;
-	snprintf(output_buf + strlen(output_buf), 
-		BUFSIZ - strlen(output_buf),
-		"mov %s, [%s + %u]",
-		dst,
-		src,
-		concat_byte);
+	if (d_bit){
+		snprintf(output_buf + strlen(output_buf), 
+			BUFSIZ - strlen(output_buf),
+			"mov %s, [%s + %u]",
+			reg_to_string(reg, w_bit),
+			regm_to_addr(regm),
+			concat_byte);
+	} else {
+		snprintf(output_buf + strlen(output_buf), 
+			BUFSIZ - strlen(output_buf),
+			"mov [%s + %u], %s",
+			regm_to_addr(regm),
+			concat_byte,
+			reg_to_string(reg, w_bit)
+			);
+	}
 }
 
 void advance_decoder(decoder_t *decoder){
