@@ -20,14 +20,22 @@ void parse_instruction(decoder_t *decoder){
 			break;
 		}
 		case 0b100000:{
-			add_immed_to_regm(decoder, "add");
+			immed_to_regm(decoder);
+			break;
+		}
+		case 0b001010:{
+			mod_regm_reg(decoder, "sub");
 			break;
 		}
 	}
 	switch(byte >> 1){
 		case 0b0000010:{
-			add_immed_to_acc(decoder, "add");	
-
+			immed_to_acc(decoder, "add");	
+			break;
+		}
+		case 0b0010110:{
+			immed_to_acc(decoder, "sub");	
+			break;
 		}
 	}
 	advance_decoder(decoder);
@@ -95,7 +103,7 @@ void mov_immed_to_reg(decoder_t *decoder){
 		reg_to_string(reg, w_bit), immed);
 }
 
-void add_immed_to_regm(decoder_t *decoder, char *instruction){
+void immed_to_regm(decoder_t *decoder){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	uint8_t s_bit = byte & 0b10;
 	uint8_t w_bit = byte & 0b01;
@@ -104,7 +112,18 @@ void add_immed_to_regm(decoder_t *decoder, char *instruction){
 
 	byte = decoder->bin_buffer[decoder->pos];
 	uint8_t mod = byte >> 6;
+	uint8_t op_octet = (byte >> 3) & 0b111;
 	uint8_t regm = byte & 0b111;
+
+	char *instruction = "";
+	switch(op_octet){
+		case 0b000:{
+			instruction = "add";
+		}
+		case 0b101:{
+			instruction = "sub";
+		}
+	}
 	instruction_data_t instr = {
 		.instruction = instruction,
 		.d_s_bit = s_bit,
@@ -129,7 +148,7 @@ void add_immed_to_regm(decoder_t *decoder, char *instruction){
 }
 
 
-void add_immed_to_acc(decoder_t *decoder, char *instruction){
+void immed_to_acc(decoder_t *decoder, char *instruction){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	uint8_t w_bit = byte & 0b1;
 	advance_decoder(decoder);
@@ -137,7 +156,6 @@ void add_immed_to_acc(decoder_t *decoder, char *instruction){
 		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
 		advance_decoder(decoder);
 		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
-		advance_decoder(decoder);
 		uint16_t data = (data_hi << 8) | data_lo;
 		snprintf(decoder->output_buf + strlen(decoder->output_buf),
 			BUFSIZ - strlen(decoder->output_buf),
@@ -378,7 +396,7 @@ void handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder){
 }
 
 void advance_decoder(decoder_t *decoder){
-	print_position(decoder->bin_buffer, decoder->pos);
+	/*print_position(decoder->bin_buffer, decoder->pos);*/
 	decoder->pos++;
 }
 
