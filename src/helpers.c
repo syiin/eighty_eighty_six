@@ -12,18 +12,22 @@ void parse_instruction(decoder_t *decoder){
 
 	switch(byte >> 2){
 		case 0b100010:{
-			mov_regm_to_reg(decoder, "mov");
+			mod_regm_reg(decoder, "mov");
 			break;
 		}
 		case 0b000000:{
-			mov_regm_to_reg(decoder, "add");
+			mod_regm_reg(decoder, "add");
+			break;
+		}
+		case 0b100000:{
+			add_immed_to_regm(decoder, "add");
 			break;
 		}
 	}
 	advance_decoder(decoder);
 }
 
-void mov_regm_to_reg(decoder_t *decoder, char *instruction){
+void mod_regm_reg(decoder_t *decoder, char *instruction){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	uint8_t d_bit = byte & 0b10;
 	uint8_t w_bit = byte & 0b01;
@@ -37,19 +41,14 @@ void mov_regm_to_reg(decoder_t *decoder, char *instruction){
 
 	instruction_data_t instr = {
 		.instruction = instruction,
-		.d_bit = d_bit,
+		.d_s_bit = d_bit,
 		.w_bit = w_bit,
 		.reg = reg,
 		.regm = regm
 	};
 	switch (mod){
 		case 0b11: {
-			snprintf(decoder->output_buf + strlen(decoder->output_buf), 
-				BUFSIZ - strlen(decoder->output_buf),
-				"%s %s, %s",
-				instruction,
-				reg_to_string(regm, w_bit),
-				reg_to_string(reg, w_bit));
+			handle_mod_11(instr, decoder);
 			break;
 		}
 		case 0b00: {
@@ -90,6 +89,25 @@ void mov_immed_to_reg(decoder_t *decoder){
 		reg_to_string(reg, w_bit), immed);
 }
 
+void add_immed_to_regm(decoder_t *decoder, char *instruction){
+	uint8_t byte = decoder->bin_buffer[decoder->pos];
+	uint8_t s_bit = byte & 0b10;
+	uint8_t w_bit = byte & 0b01;
+
+	advance_decoder(decoder);
+
+	byte = decoder->bin_buffer[decoder->pos];
+	uint8_t mod = byte >> 6;
+	uint8_t regm = byte & 0b111;
+	instruction_data_t instr = {
+		.instruction = instruction,
+		.d_s_bit = s_bit,
+		.w_bit = w_bit,
+		.reg = 0b000,
+		.regm = regm
+	};
+}
+
 byte_t *read_binary_file(const char *file_path, size_t *bin_size){
 	FILE *file = fopen(file_path, "rb");
 	if (!file){
@@ -126,7 +144,6 @@ char *reg_to_string(int reg, int is_16_bit) {
 	}
 }
 
-
 char *regm_to_addr(int regm) {
 	switch (regm) {
 		case 0b000: return  "bx + si";
@@ -141,8 +158,17 @@ char *regm_to_addr(int regm) {
 	}
 }
 
+void handle_mod_11(instruction_data_t instr, decoder_t *decoder){
+	snprintf(decoder->output_buf + strlen(decoder->output_buf), 
+		BUFSIZ - strlen(decoder->output_buf),
+		"%s %s, %s",
+		instr.instruction,
+		reg_to_string(instr.regm, instr.w_bit),
+		reg_to_string(instr.reg, instr.w_bit));
+}
+
 void handle_mod_00(instruction_data_t instr, decoder_t *decoder){
-	if (instr.d_bit){
+	if (instr.d_s_bit){
 		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 			BUFSIZ - strlen(decoder->output_buf),
 			"%s %s, [%s]",
@@ -159,12 +185,11 @@ void handle_mod_00(instruction_data_t instr, decoder_t *decoder){
 	}
 }
 
-
 void handle_mod_01(instruction_data_t instr, decoder_t *decoder){
 	advance_decoder(decoder);
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 
-	if (instr.d_bit){
+	if (instr.d_s_bit){
 		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 			BUFSIZ - strlen(decoder->output_buf),
 			"%s %s, [%s + %u]",
@@ -192,7 +217,7 @@ void handle_mod_10(instruction_data_t instr, decoder_t *decoder){
 	uint8_t second_byte = decoder->bin_buffer[decoder->pos];
 
 	uint16_t concat_byte = (second_byte << 8) | first_byte;
-	if (instr.d_bit){
+	if (instr.d_s_bit){
 		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 			BUFSIZ - strlen(decoder->output_buf),
 			"%s %s, [%s + %u]",
