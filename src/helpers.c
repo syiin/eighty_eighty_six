@@ -12,13 +12,18 @@ void parse_instruction(decoder_t *decoder){
 
 	switch(byte >> 2){
 		case 0b100010:{
-			mov_regm_to_reg(decoder);
+			mov_regm_to_reg(decoder, "mov");
+			break;
+		}
+		case 0b000000:{
+			mov_regm_to_reg(decoder, "add");
+			break;
 		}
 	}
 	advance_decoder(decoder);
 }
 
-void mov_regm_to_reg(decoder_t *decoder){
+void mov_regm_to_reg(decoder_t *decoder, char *instruction){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	uint8_t d_bit = byte & 0b10;
 	uint8_t w_bit = byte & 0b01;
@@ -29,11 +34,20 @@ void mov_regm_to_reg(decoder_t *decoder){
 	uint8_t mod = byte >> 6;
 	uint8_t reg = (byte >> 3) & 0b111;
 	uint8_t regm = byte & 0b111;
+
+	instruction_data_t instr = {
+		.instruction = instruction,
+		.d_bit = d_bit,
+		.w_bit = w_bit,
+		.reg = reg,
+		.regm = regm
+	};
 	switch (mod){
 		case 0b11: {
 			snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 				BUFSIZ - strlen(decoder->output_buf),
-				"mov %s, %s",
+				"%s %s, %s",
+				instruction,
 				reg_to_string(regm, w_bit),
 				reg_to_string(reg, w_bit));
 			break;
@@ -42,15 +56,15 @@ void mov_regm_to_reg(decoder_t *decoder){
 			if (regm == 0b110){
 				//TODO: Direct address translation exception
 			}
-			handle_mod_00(d_bit, w_bit, reg, regm, decoder);
+			handle_mod_00(instr, decoder);
 			break;
 			}
 		case 0b01: {
-			handle_mod_01(d_bit, w_bit, reg, regm, decoder);
+			handle_mod_01(instr, decoder);
 			break;
 		}
 		case 0b10: {
-			handle_mod_10(d_bit, w_bit, reg, regm, decoder);
+			handle_mod_10(instr, decoder);
 			break;
 		}
 	}
@@ -127,67 +141,73 @@ char *regm_to_addr(int regm) {
 	}
 }
 
-void handle_mod_00(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, decoder_t *decoder){
-	if (d_bit){
+void handle_mod_00(instruction_data_t instr, decoder_t *decoder){
+	if (instr.d_bit){
 		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 			BUFSIZ - strlen(decoder->output_buf),
-			"mov %s, [%s]",
-			reg_to_string(reg, w_bit),
-			regm_to_addr(regm));
+			"%s %s, [%s]",
+			instr.instruction,
+			reg_to_string(instr.reg, instr.w_bit),
+			regm_to_addr(instr.regm));
 	} else {
 		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 			BUFSIZ - strlen(decoder->output_buf),
-			"mov [%s], %s",
-			regm_to_addr(regm),
-			reg_to_string(reg, w_bit));
+			"%s [%s], %s",
+			instr.instruction,
+			regm_to_addr(instr.regm),
+			reg_to_string(instr.reg, instr.w_bit));
 	}
 }
 
 
-void handle_mod_01(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, decoder_t *decoder){
+void handle_mod_01(instruction_data_t instr, decoder_t *decoder){
 	advance_decoder(decoder);
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 
-	if (d_bit){
+	if (instr.d_bit){
 		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 			BUFSIZ - strlen(decoder->output_buf),
-			"mov %s, [%s + %u]",
-			reg_to_string(reg, w_bit),
-			regm_to_addr(regm),
+			"%s %s, [%s + %u]",
+			instr.instruction,
+			reg_to_string(instr.reg, instr.w_bit),
+			regm_to_addr(instr.regm),
 			byte);
 	} else {
 		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 			BUFSIZ - strlen(decoder->output_buf),
-			"mov [%s + %u], %s",
-			regm_to_addr(regm),
+			"%s [%s + %u], %s",
+			instr.instruction,
+			regm_to_addr(instr.regm),
 			byte,
-			reg_to_string(reg, w_bit)
+			reg_to_string(instr.reg, instr.w_bit)
 			);
 	}
 }
 
 
-void handle_mod_10(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, decoder_t *decoder){
+void handle_mod_10(instruction_data_t instr, decoder_t *decoder){
 	advance_decoder(decoder);
 	uint8_t first_byte = decoder->bin_buffer[decoder->pos];
 	advance_decoder(decoder);
 	uint8_t second_byte = decoder->bin_buffer[decoder->pos];
 
 	uint16_t concat_byte = (second_byte << 8) | first_byte;
-	if (d_bit){
+	if (instr.d_bit){
 		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 			BUFSIZ - strlen(decoder->output_buf),
-			"mov %s, [%s + %u]",
-			reg_to_string(reg, w_bit),
-			regm_to_addr(regm),
+			"%s %s, [%s + %u]",
+			instr.instruction,
+			reg_to_string(instr.reg, instr.w_bit),
+			regm_to_addr(instr.regm),
 			concat_byte);
 	} else {
 		snprintf(decoder->output_buf + strlen(decoder->output_buf), 
 			BUFSIZ - strlen(decoder->output_buf),
-			"mov [%s + %u], %s",
-			regm_to_addr(regm),
+			"%s [%s + %u], %s",
+			instr.instruction,
+			regm_to_addr(instr.regm),
 			concat_byte,
-			reg_to_string(reg, w_bit)
+			reg_to_string(instr.reg, instr.w_bit)
 			);
 	}
 }

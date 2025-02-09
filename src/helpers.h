@@ -15,12 +15,20 @@ typedef struct Decoder {
 	char output_buf[BUFSIZ];
 } decoder_t;
 
+typedef struct InstructionData {
+	char *instruction;
+	uint8_t d_bit;
+	uint8_t w_bit;
+	uint8_t reg;
+	uint8_t regm;
+} instruction_data_t;
+
 void parse_instruction(decoder_t *decoder);
-void mov_regm_to_reg(decoder_t *decoder);
+void mov_regm_to_reg(decoder_t *decoder, char *instruction);
 void mov_immed_to_reg(decoder_t *decoder);
-void handle_mod_00(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, decoder_t *decoder);
-void handle_mod_01(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, decoder_t *decoder);
-void handle_mod_10(uint8_t d_bit, uint8_t w_bit, uint8_t reg, uint8_t regm, decoder_t *decoder);
+void handle_mod_00(instruction_data_t instruction_data, decoder_t *decoder);
+void handle_mod_01(instruction_data_t instruction_data, decoder_t *decoder);
+void handle_mod_10(instruction_data_t instruction_data, decoder_t *decoder);
 byte_t *read_binary_file(const char *file_path, size_t *bin_size);
 char *regm_to_addr(int regm);
 char *reg_to_string(int reg, int is_16_bit);
