@@ -27,11 +27,17 @@ void parse_instruction(decoder_t *decoder);
 void mod_regm_reg(decoder_t *decoder, char *instruction);
 void mov_immed_to_reg(decoder_t *decoder);
 void add_immed_to_regm(decoder_t *decoder, char *instruction);
+void add_immed_to_acc(decoder_t *decoder, char *instruction);
 
 void handle_mod_11(instruction_data_t instr, decoder_t *decoder);
 void handle_mod_00(instruction_data_t instr, decoder_t *decoder);
 void handle_mod_01(instruction_data_t instr, decoder_t *decoder);
 void handle_mod_10(instruction_data_t instr, decoder_t *decoder);
+
+void handle_mod_11_immed(instruction_data_t instr, decoder_t *decoder);
+void handle_mod_00_immed(instruction_data_t instr, decoder_t *decoder);
+void handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder);
+
 byte_t *read_binary_file(const char *file_path, size_t *bin_size);
 char *regm_to_addr(int regm);
 char *reg_to_string(int reg, int is_16_bit);

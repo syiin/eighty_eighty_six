@@ -24,6 +24,12 @@ void parse_instruction(decoder_t *decoder){
 			break;
 		}
 	}
+	switch(byte >> 1){
+		case 0b0000010:{
+			add_immed_to_acc(decoder, "add");	
+
+		}
+	}
 	advance_decoder(decoder);
 }
 
@@ -106,6 +112,48 @@ void add_immed_to_regm(decoder_t *decoder, char *instruction){
 		.reg = 0b000,
 		.regm = regm
 	};
+	switch (mod){
+		case 0b11:{
+			handle_mod_11_immed(instr, decoder);
+			break;
+		}
+		case 0b00:{
+			handle_mod_00_immed(instr, decoder);
+			break;
+		}
+		case 0b10:{
+			handle_mod_10_immed(instr, decoder);
+			break;
+		}
+	}
+}
+
+
+void add_immed_to_acc(decoder_t *decoder, char *instruction){
+	uint8_t byte = decoder->bin_buffer[decoder->pos];
+	uint8_t w_bit = byte & 0b1;
+	advance_decoder(decoder);
+	if (w_bit == 1){
+		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint16_t data = (data_hi << 8) | data_lo;
+		snprintf(decoder->output_buf + strlen(decoder->output_buf),
+			BUFSIZ - strlen(decoder->output_buf),
+			"%s %s, %u",
+			instruction,
+			"ax",
+			data);
+	} else {
+		uint8_t data = decoder->bin_buffer[decoder->pos];
+		snprintf(decoder->output_buf + strlen(decoder->output_buf),
+			BUFSIZ - strlen(decoder->output_buf),
+			"%s %s, %u",
+			instruction,
+			"al",
+			data);
+	}
 }
 
 byte_t *read_binary_file(const char *file_path, size_t *bin_size){
@@ -153,7 +201,7 @@ char *regm_to_addr(int regm) {
 		case 0b100: return  "si";
 		case 0b101: return  "di";
 		case 0b110: return "bp";
-		case 0b111: return  "bi";
+		case 0b111: return  "bx";
 		default: return "ILLEGAL_REG";
 	}
 }
@@ -209,7 +257,6 @@ void handle_mod_01(instruction_data_t instr, decoder_t *decoder){
 	}
 }
 
-
 void handle_mod_10(instruction_data_t instr, decoder_t *decoder){
 	advance_decoder(decoder);
 	uint8_t first_byte = decoder->bin_buffer[decoder->pos];
@@ -237,8 +284,101 @@ void handle_mod_10(instruction_data_t instr, decoder_t *decoder){
 	}
 }
 
+void handle_mod_11_immed(instruction_data_t instr, decoder_t *decoder){
+	advance_decoder(decoder);
+
+	if (instr.d_s_bit == 0 && instr.w_bit == 1){
+		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint16_t data = (data_hi << 8) | data_lo;
+
+		snprintf(decoder->output_buf + strlen(decoder->output_buf),
+			BUFSIZ - strlen(decoder->output_buf),
+			"%s %s, %i",
+			instr.instruction,
+			reg_to_string(instr.regm, instr.w_bit), data);
+	} else {
+		uint8_t data = decoder->bin_buffer[decoder->pos];
+		snprintf(decoder->output_buf + strlen(decoder->output_buf),
+			BUFSIZ - strlen(decoder->output_buf),
+			"%s %s, %u",
+			instr.instruction,
+			reg_to_string(instr.regm, instr.w_bit), data);
+	}
+}
+
+
+void handle_mod_00_immed(instruction_data_t instr, decoder_t *decoder){
+	advance_decoder(decoder);
+
+	if (instr.d_s_bit == 0 && instr.w_bit == 1){
+		uint8_t disp_lo = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint8_t disp_hi = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint16_t disp = (disp_hi << 8) | disp_lo;
+
+		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint16_t data = (data_hi << 8) | data_lo;
+
+		snprintf(decoder->output_buf + strlen(decoder->output_buf),
+			BUFSIZ - strlen(decoder->output_buf),
+			"%s [%s + %d], %i",
+			instr.instruction,
+			regm_to_addr(instr.regm),
+			disp,
+			data);
+	} else {
+		uint8_t immed = decoder->bin_buffer[decoder->pos];
+		snprintf(decoder->output_buf + strlen(decoder->output_buf),
+			BUFSIZ - strlen(decoder->output_buf),
+			"%s [%s], %u",
+			instr.instruction,
+			regm_to_addr(instr.regm), immed);
+	}
+}
+
+void handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder){
+	advance_decoder(decoder);
+	uint8_t disp_lo = decoder->bin_buffer[decoder->pos];
+	advance_decoder(decoder);
+	uint8_t disp_hi = decoder->bin_buffer[decoder->pos];
+	advance_decoder(decoder);
+	uint16_t disp = (disp_hi << 8) | disp_lo;
+
+	if (instr.d_s_bit == 0 && instr.w_bit == 1){
+		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint16_t data = (data_hi << 8) | data_lo;
+
+		snprintf(decoder->output_buf + strlen(decoder->output_buf),
+			BUFSIZ - strlen(decoder->output_buf),
+			"%s [%s + %d], %i",
+			instr.instruction,
+			regm_to_addr(instr.regm),
+			disp,
+			data);
+	} else {
+		uint8_t data = decoder->bin_buffer[decoder->pos];
+		snprintf(decoder->output_buf + strlen(decoder->output_buf),
+			BUFSIZ - strlen(decoder->output_buf),
+			"%s [%s + %d], %u",
+			instr.instruction,
+			regm_to_addr(instr.regm),
+			disp,
+			data);
+	}
+}
+
 void advance_decoder(decoder_t *decoder){
-	/*print_position(decoder->bin_buffer, decoder->pos);*/
+	print_position(decoder->bin_buffer, decoder->pos);
 	decoder->pos++;
 }
 
