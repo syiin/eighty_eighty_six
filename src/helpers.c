@@ -27,6 +27,10 @@ void parse_instruction(decoder_t *decoder){
 			mod_regm_reg(decoder, "sub");
 			break;
 		}
+		case 0b001110:{
+			mod_regm_reg(decoder, "cmp");
+			break;
+		}
 	}
 	switch(byte >> 1){
 		case 0b0000010:{
@@ -119,9 +123,15 @@ void immed_to_regm(decoder_t *decoder){
 	switch(op_octet){
 		case 0b000:{
 			instruction = "add";
+			break;
 		}
 		case 0b101:{
 			instruction = "sub";
+			break;
+		}
+		case 0b111:{
+			instruction = "cmp";
+			break;
 		}
 	}
 	instruction_data_t instr = {
