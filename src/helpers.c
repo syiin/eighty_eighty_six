@@ -114,19 +114,19 @@ void parse_instruction(decoder_t *decoder){
 			break;
 		}
 		case 0b11100010:{
-			jmp_opcode(decoder, "loop");
+			loop_opcode(decoder, "loop");
 			break;
 		}
 		case 0b11100001:{
-			jmp_opcode(decoder, "loopz");
+			loop_opcode(decoder, "loopz");
 			break;
 		}
 		case 0b11100000:{
-			jmp_opcode(decoder, "loopnz");
+			loop_opcode(decoder, "loopnz");
 			break;
 		}
 		case 0b11100011:{
-			jmp_opcode(decoder, "jcxz");
+			loop_opcode(decoder, "jcxz");
 			break;
 		}
 	}
@@ -177,6 +177,17 @@ void mod_regm_reg(decoder_t *decoder, char *instruction){
 }
 
 void jmp_opcode(decoder_t *decoder, char *instruction){
+	advance_decoder(decoder);
+	int8_t ip_inc8 = (int8_t)decoder->bin_buffer[decoder->pos];
+	snprintf(decoder->output_buf + strlen(decoder->output_buf),
+		BUFSIZ - strlen(decoder->output_buf),
+		"%s short %d",
+		instruction,
+		ip_inc8);
+}
+
+
+void loop_opcode(decoder_t *decoder, char *instruction){
 	advance_decoder(decoder);
 	int8_t ip_inc8 = (int8_t)decoder->bin_buffer[decoder->pos];
 	snprintf(decoder->output_buf + strlen(decoder->output_buf),
