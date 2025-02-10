@@ -8,6 +8,7 @@ void parse_instruction(decoder_t *decoder){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	if(byte >> 4 == 0b1011){
 		mov_immed_to_reg(decoder);
+		return;
 	}
 
 	switch(byte >> 2){
@@ -177,13 +178,12 @@ void mod_regm_reg(decoder_t *decoder, char *instruction){
 
 void jmp_opcode(decoder_t *decoder, char *instruction){
 	advance_decoder(decoder);
-	uint8_t ip_inc8 = decoder->bin_buffer[decoder->pos];
+	int8_t ip_inc8 = (int8_t)decoder->bin_buffer[decoder->pos];
 	snprintf(decoder->output_buf + strlen(decoder->output_buf),
 		BUFSIZ - strlen(decoder->output_buf),
 		"%s %d",
 		instruction,
 		ip_inc8);
-
 }
 
 void mov_immed_to_reg(decoder_t *decoder){
@@ -419,7 +419,7 @@ void handle_mod_11_immed(instruction_data_t instr, decoder_t *decoder){
 		advance_decoder(decoder);
 		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
 		/*advance_decoder(decoder);*/
-		uint16_t data = (data_hi << 8) | data_lo;
+		int16_t data = (int16_t)(data_hi << 8) | data_lo;
 
 		snprintf(decoder->output_buf + strlen(decoder->output_buf),
 			BUFSIZ - strlen(decoder->output_buf),
