@@ -41,13 +41,101 @@ void parse_instruction(decoder_t *decoder){
 			immed_to_acc(decoder, "sub");	
 			break;
 		}
+		case 0b0011110:{
+			immed_to_acc(decoder, "cmp");	
+			break;
+		}
 	}
+
+	switch (byte){
+		case 0b01110101:{
+			jmp_opcode(decoder, "jnz");
+			break;
+		}
+		case 0b01110100:{
+			jmp_opcode(decoder, "je");
+			break;
+		}
+		case 0b01111100:{
+			jmp_opcode(decoder, "jl");
+			break;
+		}
+		case 0b01111110:{
+			jmp_opcode(decoder, "jle");
+			break;
+		}
+		case 0b01110010:{
+			jmp_opcode(decoder, "jb");
+			break;
+		}
+		case 0b01110110:{
+			jmp_opcode(decoder, "jbe");
+			break;
+		}
+		case 0b01111010:{
+			jmp_opcode(decoder, "jp");
+			break;
+		}
+		case 0b01110000:{
+			jmp_opcode(decoder, "jo");
+			break;
+		}
+		case 0b01111000:{
+			jmp_opcode(decoder, "js");
+			break;
+		}
+		case 0b01111101:{
+			jmp_opcode(decoder, "jnl");
+			break;
+		}
+		case 0b01111111:{
+			jmp_opcode(decoder, "jg");
+			break;
+		}
+		case 0b01110011:{
+			jmp_opcode(decoder, "jnb");
+			break;
+		}
+		case 0b1110111:{
+			jmp_opcode(decoder, "ja");
+			break;
+		}
+		case 0b01111011:{
+			jmp_opcode(decoder, "jnp");
+			break;
+		}
+		case 0b01110001:{
+			jmp_opcode(decoder, "jno");
+			break;
+		}
+		case 0b01111001:{
+			jmp_opcode(decoder, "jns");
+			break;
+		}
+		case 0b11100010:{
+			jmp_opcode(decoder, "loop");
+			break;
+		}
+		case 0b11100001:{
+			jmp_opcode(decoder, "loopz");
+			break;
+		}
+		case 0b11100000:{
+			jmp_opcode(decoder, "loopnz");
+			break;
+		}
+		case 0b11100011:{
+			jmp_opcode(decoder, "jcxz");
+			break;
+		}
+	}
+
 	advance_decoder(decoder);
 }
 
 void mod_regm_reg(decoder_t *decoder, char *instruction){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
-	uint8_t d_bit = byte & 0b10;
+	uint8_t d_bit = (byte >> 1) & 0b01;
 	uint8_t w_bit = byte & 0b01;
 
 	advance_decoder(decoder);
@@ -87,6 +175,17 @@ void mod_regm_reg(decoder_t *decoder, char *instruction){
 	}
 }
 
+void jmp_opcode(decoder_t *decoder, char *instruction){
+	advance_decoder(decoder);
+	uint8_t ip_inc8 = decoder->bin_buffer[decoder->pos];
+	snprintf(decoder->output_buf + strlen(decoder->output_buf),
+		BUFSIZ - strlen(decoder->output_buf),
+		"%s %d",
+		instruction,
+		ip_inc8);
+
+}
+
 void mov_immed_to_reg(decoder_t *decoder){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	uint8_t w_bit = (byte >> 3) & 0b1;
@@ -109,7 +208,7 @@ void mov_immed_to_reg(decoder_t *decoder){
 
 void immed_to_regm(decoder_t *decoder){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
-	uint8_t s_bit = byte & 0b10;
+	uint8_t s_bit = (byte >> 1) & 0b01;
 	uint8_t w_bit = byte & 0b01;
 
 	advance_decoder(decoder);
@@ -138,7 +237,7 @@ void immed_to_regm(decoder_t *decoder){
 		.instruction = instruction,
 		.d_s_bit = s_bit,
 		.w_bit = w_bit,
-		.reg = 0b000,
+		.reg = op_octet,
 		.regm = regm
 	};
 	switch (mod){
@@ -319,7 +418,7 @@ void handle_mod_11_immed(instruction_data_t instr, decoder_t *decoder){
 		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
 		advance_decoder(decoder);
 		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
-		advance_decoder(decoder);
+		/*advance_decoder(decoder);*/
 		uint16_t data = (data_hi << 8) | data_lo;
 
 		snprintf(decoder->output_buf + strlen(decoder->output_buf),
@@ -345,13 +444,13 @@ void handle_mod_00_immed(instruction_data_t instr, decoder_t *decoder){
 		uint8_t disp_lo = decoder->bin_buffer[decoder->pos];
 		advance_decoder(decoder);
 		uint8_t disp_hi = decoder->bin_buffer[decoder->pos];
-		advance_decoder(decoder);
 		uint16_t disp = (disp_hi << 8) | disp_lo;
 
+		advance_decoder(decoder);
 		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
 		advance_decoder(decoder);
 		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
-		advance_decoder(decoder);
+		/*advance_decoder(decoder);*/
 		uint16_t data = (data_hi << 8) | data_lo;
 
 		snprintf(decoder->output_buf + strlen(decoder->output_buf),
@@ -361,13 +460,32 @@ void handle_mod_00_immed(instruction_data_t instr, decoder_t *decoder){
 			regm_to_addr(instr.regm),
 			disp,
 			data);
-	} else {
-		uint8_t immed = decoder->bin_buffer[decoder->pos];
+	} else if(instr.d_s_bit == 1 && instr.w_bit == 1 && strcmp(instr.instruction, "cmp") == 0){
+		uint8_t disp_lo = decoder->bin_buffer[decoder->pos];
+		advance_decoder(decoder);
+		uint8_t disp_hi = decoder->bin_buffer[decoder->pos];
+		uint16_t disp = (disp_hi << 8) | disp_lo;
+
+		advance_decoder(decoder);
+		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
+
 		snprintf(decoder->output_buf + strlen(decoder->output_buf),
 			BUFSIZ - strlen(decoder->output_buf),
-			"%s [%s], %u",
+			"%s word [%d], %i",
 			instr.instruction,
-			regm_to_addr(instr.regm), immed);
+			disp,
+			data_lo);
+	} else {
+		uint8_t immed = decoder->bin_buffer[decoder->pos];
+		char *wb = "byte";
+		if (instr.w_bit){ wb = "word"; }
+		snprintf(decoder->output_buf + strlen(decoder->output_buf),
+			BUFSIZ - strlen(decoder->output_buf),
+			"%s %s [%s], %u",
+			instr.instruction,
+			wb,
+			regm_to_addr(instr.regm),
+			immed);
 	}
 }
 
@@ -376,9 +494,9 @@ void handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder){
 	uint8_t disp_lo = decoder->bin_buffer[decoder->pos];
 	advance_decoder(decoder);
 	uint8_t disp_hi = decoder->bin_buffer[decoder->pos];
-	advance_decoder(decoder);
 	uint16_t disp = (disp_hi << 8) | disp_lo;
 
+	advance_decoder(decoder);
 	if (instr.d_s_bit == 0 && instr.w_bit == 1){
 		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
 		advance_decoder(decoder);
@@ -388,17 +506,20 @@ void handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder){
 
 		snprintf(decoder->output_buf + strlen(decoder->output_buf),
 			BUFSIZ - strlen(decoder->output_buf),
-			"%s [%s + %d], %i",
+			"%s word [%s + %d], %i",
 			instr.instruction,
 			regm_to_addr(instr.regm),
 			disp,
 			data);
 	} else {
 		uint8_t data = decoder->bin_buffer[decoder->pos];
+		char *word = "";
+		if (instr.w_bit) { word = "word "; }
 		snprintf(decoder->output_buf + strlen(decoder->output_buf),
 			BUFSIZ - strlen(decoder->output_buf),
-			"%s [%s + %d], %u",
+			"%s %s[%s + %d], %u",
 			instr.instruction,
+			word,
 			regm_to_addr(instr.regm),
 			disp,
 			data);

@@ -38,6 +38,8 @@ void handle_mod_11_immed(instruction_data_t instr, decoder_t *decoder);
 void handle_mod_00_immed(instruction_data_t instr, decoder_t *decoder);
 void handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder);
 
+void jmp_opcode(decoder_t *decoder, char *instruction);
+
 byte_t *read_binary_file(const char *file_path, size_t *bin_size);
 char *regm_to_addr(int regm);
 char *reg_to_string(int reg, int is_16_bit);
