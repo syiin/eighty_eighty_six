@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include "helpers.h"
+#include "decoder_helpers.h"
 
 void parse_instruction(decoder_t *decoder){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];

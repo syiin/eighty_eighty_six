@@ -1,6 +1,6 @@
 
-#ifndef HELPERS_H
-#define HELPERS_H
+#ifndef DECODER_HELPERS_H
+#define DECODER_HELPERS_H
 
 #include <stdio.h>
 #include <stdatomic.h>

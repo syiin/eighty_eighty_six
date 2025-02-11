@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "helpers.h"
+#include "decoder_helpers.h"
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
@@ -20,17 +20,15 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	decoder_t *decoder = malloc(sizeof(decoder_t));
-	decoder->pos = 0;
-	decoder->bin_buffer = bin_buffer;
-	/*char output_buf[128];*/
+	decoder_t decoder = {
+		.pos = 0,
+		.bin_buffer = bin_buffer,
+	};
 
-	while (decoder->pos < bin_size){
-		strcpy(decoder->output_buf, "");
-		parse_instruction(decoder);
-		printf("%s\n", decoder->output_buf);
+	while (decoder.pos < bin_size){
+		strcpy(decoder.output_buf, "");
+		parse_instruction(&decoder);
+		printf("%s\n", decoder.output_buf);
 	}
-
-	free(decoder);
 }
 
