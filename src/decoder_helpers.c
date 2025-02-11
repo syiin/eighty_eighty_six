@@ -294,28 +294,6 @@ void immed_to_acc(decoder_t *decoder, char *instruction){
 	}
 }
 
-byte_t *read_binary_file(const char *file_path, size_t *bin_size){
-	FILE *file = fopen(file_path, "rb");
-	if (!file){
-		return NULL;
-	}
-	// Get the size of the file - may be inefficient as files get larger
-	fseek(file, 0, SEEK_END);
-	*bin_size = ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	byte_t *bin_buffer = malloc(*bin_size);
-	if (!bin_buffer){
-		fclose(file);
-		return NULL;
-	}
-
-	fread(bin_buffer, sizeof(byte_t), *bin_size, file);
-	fclose(file);
-
-	return bin_buffer;
-}
-
 char *reg_to_string(int reg, int is_16_bit) {
 	switch (reg) {
 		case 0b000: return is_16_bit ? "ax" : "al";
@@ -540,6 +518,28 @@ void handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder){
 void advance_decoder(decoder_t *decoder){
 	/*print_position(decoder->bin_buffer, decoder->pos);*/
 	decoder->pos++;
+}
+
+byte_t *read_binary_file(const char *file_path, size_t *bin_size){
+	FILE *file = fopen(file_path, "rb");
+	if (!file){
+		return NULL;
+	}
+	// Get the size of the file - may be inefficient as files get larger
+	fseek(file, 0, SEEK_END);
+	*bin_size = ftell(file);
+	fseek(file, 0, SEEK_SET);
+
+	byte_t *bin_buffer = malloc(*bin_size);
+	if (!bin_buffer){
+		fclose(file);
+		return NULL;
+	}
+
+	fread(bin_buffer, sizeof(byte_t), *bin_size, file);
+	fclose(file);
+
+	return bin_buffer;
 }
 
 // DEBUGGING PRINT FUNCTIONS

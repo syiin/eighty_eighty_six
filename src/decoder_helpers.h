@@ -41,10 +41,11 @@ void handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder);
 void jmp_opcode(decoder_t *decoder, char *instruction);
 void loop_opcode(decoder_t *decoder, char *instruction);
 
-byte_t *read_binary_file(const char *file_path, size_t *bin_size);
 char *regm_to_addr(int regm);
 char *reg_to_string(int reg, int is_16_bit);
 void advance_decoder(decoder_t *decoder);
+
+byte_t *read_binary_file(const char *file_path, size_t *bin_size);
 
 void print_encoding_to_int(char *encoding);
 void print_position(const byte_t *buffer, int pos);
