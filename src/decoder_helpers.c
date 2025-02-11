@@ -215,6 +215,7 @@ void mov_immed_to_reg(decoder_t *decoder){
 		BUFSIZ - strlen(decoder->output_buf),
 		"mov %s, %u",
 		reg_to_string(reg, w_bit), immed);
+	advance_decoder(decoder);
 }
 
 void immed_to_regm(decoder_t *decoder){
@@ -570,8 +571,8 @@ int slice_peek_bits(decoder_t *decoder, int start, int end){
 }
 
 int get_bits(int num, int start, int end) {
-   int width_mask = (1 << (end - start + 1)) - 1;
-   int positioned_mask = width_mask << start;
-   int masked = num & positioned_mask;
-   return masked >> start;
+	int width_mask = (1 << (end - start + 1)) - 1;
+	int positioned_mask = width_mask << start;
+	int masked = num & positioned_mask;
+	return masked >> start;
 }
