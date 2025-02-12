@@ -134,6 +134,54 @@ void parse_instruction(decoder_t *decoder){
 	advance_decoder(decoder);
 }
 
+operand_t create_memory_operand(cpu_reg_t base, cpu_reg_t index, int16_t displacement, uint8_t width) {
+	operand_t op = {
+	.type = OPERAND_MEMORY,
+	.width = width,
+	.value.memory = {
+		.base_reg = base,
+		.index_reg = index,
+	    	.displacement = displacement,
+	    	.has_base = (base != REG_NONE),
+	    	.has_index = (index != REG_NONE),
+	    	.has_displacement = (displacement != 0)
+	}
+	};
+	return op;
+}
+
+// Helper function to create a register operand
+operand_t create_register_operand(cpu_reg_t reg) {
+	// Determine size based on register type
+	uint8_t width = 2;  // Default to word size
+	if (reg >= REG_AL && reg <= REG_DL) width = 1;  // 8-bit low registers
+	if (reg >= REG_AH && reg <= REG_DH) width = 1;  // 8-bit high registers
+
+	return (operand_t) {
+		.type = OPERAND_REGISTER,
+		.width = width,
+		.value.reg = reg
+	};
+}
+
+// Helper function to create an immediate operand
+operand_t create_immediate_operand(int16_t value, uint8_t width) {
+	return (operand_t) {
+		.type = OPERAND_IMMEDIATE,
+		.width = width,
+		.value.immediate = value
+	};
+}
+
+// Create a complete instruction
+instruction_t create_instruction(operation_t op, operand_t dest, operand_t src) {
+	return (instruction_t) {
+		.op = op,
+		.dest = dest,
+		.src = src
+	};
+}
+
 void mod_regm_reg(decoder_t *decoder, char *instruction){
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	uint8_t d_bit = (byte >> 1) & 0b01;
