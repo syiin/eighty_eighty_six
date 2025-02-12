@@ -25,10 +25,11 @@ int main(int argc, char *argv[]) {
 		.bin_buffer = bin_buffer,
 	};
 
-	while (decoder.pos < bin_size){
-		strcpy(decoder.output_buf, "");
-		parse_instruction(&decoder);
-		printf("%s\n", decoder.output_buf);
+	while (decoder.pos < bin_size - 1){
+		/*strcpy(decoder.output_buf, "");*/
+		instruction_t instruction = parse_instruction(&decoder);
+		format_instruction(&instruction);
+		/*printf("%s\n", decoder.output_buf);*/
 	}
 }
 
