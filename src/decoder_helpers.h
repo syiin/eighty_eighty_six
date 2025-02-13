@@ -15,14 +15,6 @@ typedef struct Decoder {
 	char output_buf[BUFSIZ];
 } decoder_t;
 
-typedef struct InstructionData {
-	char *instruction;
-	uint8_t d_s_bit;
-	uint8_t w_bit;
-	uint8_t reg;
-	uint8_t regm;
-} instruction_data_t;
-
 typedef enum Register {
 	REG_NONE = 0,
 	// General purpose registers (16-bit)
@@ -49,14 +41,21 @@ static const char* const reg_names[] = {
 };
 
 typedef enum Operation {
-	OP_MOV, OP_PUSH, OP_POP, OP_XCHG, OP_LEA,
-	OP_ADD, OP_ADC, OP_SUB, OP_SBB, 
-	OP_MUL, OP_IMUL, OP_DIV, OP_IDIV,
-	OP_INC, OP_DEC, OP_NEG,
-	OP_AND, OP_OR, OP_XOR, OP_NOT,
-	OP_JMP, OP_CALL, OP_RET,
-	OP_JE, OP_JNE, OP_JL, OP_JLE, OP_JG, OP_JGE,
+	OP_MOV,
+	OP_ADD, OP_SUB, OP_CMP,
+	OP_JMP, OP_JNZ, OP_JB,
+	OP_JE, OP_JNE, OP_JL, OP_JLE, OP_JG, OP_JGE, OP_JBE, OP_JP,
+	OP_JO, OP_JS, OP_JNL, OP_JA, OP_JNB, OP_JNP, OP_JNO, OP_JNS,OP_JCXZ,
+	LOOP_LOOP, LOOP_LOOPZ, LOOP_LOOPNZ
 } operation_t;
+
+typedef struct InstructionData {
+	operation_t operation;
+	uint8_t d_s_bit;
+	uint8_t w_bit;
+	uint8_t reg;
+	uint8_t regm;
+} instruction_data_t;
 
 typedef enum OperandType {
 	OPERAND_NONE,
@@ -77,7 +76,7 @@ typedef struct MemoryAddress {
 
 typedef struct Operand {
 	operand_type_t type;
-	uint8_t width;              // Size in bytes (1 or 2)
+	/*uint8_t width;              // Size in bytes (1 or 2)*/
 	union {
 		cpu_reg_t reg;		// Register operand
 		memory_address_t memory;   // Memory reference
@@ -93,22 +92,22 @@ typedef struct Instruction {
 } instruction_t;
 
 instruction_t parse_instruction(decoder_t *decoder);
-instruction_t mod_regm_reg(decoder_t *decoder, char *instruction);
-void mov_immed_to_reg(decoder_t *decoder);
-void immed_to_regm(decoder_t *decoder);
-void immed_to_acc(decoder_t *decoder, char *instruction);
+instruction_t mod_regm_reg(decoder_t *decoder, operation_t operation);
+instruction_t mov_immed_to_reg(decoder_t *decoder);
+instruction_t immed_to_regm(decoder_t *decoder);
+instruction_t immed_to_acc(decoder_t *decoder, operation_t operation);
 
 instruction_t handle_mod_11(instruction_data_t instr, decoder_t *decoder);
-void handle_mod_00(instruction_data_t instr, decoder_t *decoder);
-void handle_mod_01(instruction_data_t instr, decoder_t *decoder);
-void handle_mod_10(instruction_data_t instr, decoder_t *decoder);
+instruction_t handle_mod_00(instruction_data_t instr, decoder_t *decoder);
+instruction_t handle_mod_01(instruction_data_t instr, decoder_t *decoder);
+instruction_t handle_mod_10(instruction_data_t instr, decoder_t *decoder);
 
-void handle_mod_11_immed(instruction_data_t instr, decoder_t *decoder);
-void handle_mod_00_immed(instruction_data_t instr, decoder_t *decoder);
-void handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder);
+instruction_t handle_mod_11_immed(instruction_data_t instr, decoder_t *decoder);
+instruction_t handle_mod_00_immed(instruction_data_t instr, decoder_t *decoder);
+instruction_t handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder);
 
-void jmp_opcode(decoder_t *decoder, char *instruction);
-void loop_opcode(decoder_t *decoder, char *instruction);
+instruction_t jmp_opcode(decoder_t *decoder, operation_t operation);
+instruction_t loop_opcode(decoder_t *decoder, operation_t operation);
 
 char *regm_to_addr(int regm);
 char *reg_to_string(int reg, int is_16_bit);
@@ -124,4 +123,5 @@ int slice_current_bits(decoder_t *decoder, int start, int end);
 int slice_peek_bits(decoder_t *decoder, int start, int end);
 int get_bits(int num, int start, int end);
 
+cpu_reg_t bits_to_reg(int reg, int is_16_bit);
 #endif
