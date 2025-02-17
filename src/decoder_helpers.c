@@ -174,6 +174,7 @@ instruction_t create_instruction(operation_t op, operand_t dest,
 }
 
 instruction_t mod_regm_reg(decoder_t *decoder, operation_t operation) {
+	/*printf("Debug - Inside mod_regm_reg, operation = %d\n", operation);*/
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
 	uint8_t d_bit = (byte >> 1) & 0b01;
 	uint8_t w_bit = byte & 0b01;
@@ -198,16 +199,13 @@ instruction_t mod_regm_reg(decoder_t *decoder, operation_t operation) {
 			if (regm == 0b110) {
 				// TODO: Direct address translation exception
 			}
-			handle_mod_00(instr, decoder);
-			break;
+			return handle_mod_00(instr, decoder);
 		}
 		case 0b01: {
-			handle_mod_01(instr, decoder);
-			break;
+			return handle_mod_01(instr, decoder);
 		}
 		case 0b10: {
-			handle_mod_10(instr, decoder);
-			break;
+			return handle_mod_10(instr, decoder);
 		}
 	}
 	return (instruction_t){};
@@ -410,8 +408,8 @@ instruction_t handle_mod_11(instruction_data_t instr, decoder_t *decoder) {
 
 instruction_t handle_mod_00(instruction_data_t instr, decoder_t *decoder) {
 	if (instr.d_s_bit) {
-		operand_t dest = create_register_operand_from_bits(instr.reg, instr.w_bit); // WRONG
-		operand_t src = create_memory_operand_from_bits(instr.regm, 0);  // WRONG
+		operand_t dest = create_register_operand_from_bits(instr.reg, instr.w_bit);
+		operand_t src = create_memory_operand_from_bits(instr.regm, 0);
 		return create_instruction(instr.operation, dest, src);
 
 		/*snprintf(decoder->output_buf + strlen(decoder->output_buf),*/
@@ -419,8 +417,8 @@ instruction_t handle_mod_00(instruction_data_t instr, decoder_t *decoder) {
 		/*	instr.operation, reg_to_string(instr.reg, instr.w_bit),*/
 		/*	regm_to_addr(instr.regm));*/
 	} else {
-		operand_t dest = create_memory_operand_from_bits(instr.regm, 0);  // WRONG
-		operand_t src = create_register_operand_from_bits(instr.reg, instr.w_bit);  // WRONG
+		operand_t dest = create_memory_operand_from_bits(instr.regm, 0);
+		operand_t src = create_register_operand_from_bits(instr.reg, instr.w_bit);
 		return create_instruction(instr.operation, dest, src);
 		/*snprintf(decoder->output_buf + strlen(decoder->output_buf),*/
 		/*	BUFSIZ - strlen(decoder->output_buf), "%s [%s], %s",*/
@@ -435,7 +433,7 @@ instruction_t handle_mod_01(instruction_data_t instr, decoder_t *decoder) {
 
 	if (instr.d_s_bit) {
 		operand_t dest = create_register_operand_from_bits(instr.reg, instr.w_bit);
-		operand_t src = create_memory_operand_from_bits(instr.reg, byte);
+		operand_t src = create_memory_operand_from_bits(instr.regm, byte);
 		return create_instruction(instr.operation, dest, src);
 		/*snprintf(decoder->output_buf + strlen(decoder->output_buf),*/
 		/*  BUFSIZ - strlen(decoder->output_buf), "%s %s, [%s + %u]",*/
@@ -482,18 +480,19 @@ instruction_t handle_mod_11_immed(instruction_data_t instr,
 				  decoder_t *decoder) {
 	advance_decoder(decoder);
 	int16_t data;
-	if (instr.w_bit == 1) {
+	if (instr.d_s_bit == 0 && instr.w_bit == 1) {
 		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
 		advance_decoder(decoder);
 		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
 		data = (int16_t)((data_hi << 8) | data_lo);
 	} else {
+		data = decoder->bin_buffer[decoder->pos];
 		// Sign extend if s_bit is set
-		if (instr.d_s_bit) {
-		    data = (int8_t)decoder->bin_buffer[decoder->pos];
-		} else {
-		    data = decoder->bin_buffer[decoder->pos];
-		}
+		/*if (instr.d_s_bit) {*/
+		/*    data = (int8_t)decoder->bin_buffer[decoder->pos];*/
+		/*} else {*/
+		/*    data = decoder->bin_buffer[decoder->pos];*/
+		/*}*/
 	}
 	/*uint16_t data;*/
 	/*if (instr.d_s_bit == 0 && instr.w_bit == 1) {*/
@@ -510,7 +509,7 @@ instruction_t handle_mod_11_immed(instruction_data_t instr,
 		/*  BUFSIZ - strlen(decoder->output_buf), "%s %s, %u", instr.operation,*/
 		/*  reg_to_string(instr.regm, instr.w_bit), data);*/
 	/*}*/
-	operand_t dest = create_register_operand_from_bits(instr.reg, instr.w_bit);
+	operand_t dest = create_register_operand_from_bits(instr.regm, instr.w_bit);
 	operand_t src = create_immediate_operand(data);
 	return create_instruction(instr.operation, dest, src);
 }
@@ -599,7 +598,7 @@ instruction_t handle_mod_10_immed(instruction_data_t instr,
 }
 
 void advance_decoder(decoder_t *decoder) {
-	print_position(decoder->bin_buffer, decoder->pos);
+	/*print_position(decoder->bin_buffer, decoder->pos);*/
 	decoder->pos++;
 }
 
@@ -626,7 +625,7 @@ byte_t *read_binary_file(const char *file_path, size_t *bin_size) {
 }
 
 static const char *const op_names[] = {
-	[OP_MOV] = "mov", [OP_ADD] = "add", [OP_SUB] = "sub", [OP_JMP] = "jmp",
+	[OP_MOV] = "mov", [OP_ADD] = "add", [OP_SUB] = "sub", [OP_CMP] = "cmp", [OP_JMP] = "jmp",
 	[OP_JE] = "je",   [OP_JNE] = "jne", [OP_JL] = "jl",   [OP_JLE] = "jle",
 	[OP_JG] = "jg",   [OP_JGE] = "jge"};
 
@@ -691,6 +690,7 @@ void format_instruction(const instruction_t *inst) {
 		inst->op == OP_JGE) {
 		printf("%s %s\n", op_names[inst->op], dest_buf);
 	} else {
+		/*printf("DEBUG: op_names[%d] = %s\n", inst->op, op_names[inst->op]);*/
 		printf("%s %s, %s\n", op_names[inst->op], dest_buf, src_buf);
 	}
 }
