@@ -6,105 +6,138 @@
 
 instruction_t parse_instruction(decoder_t *decoder) {
 	uint8_t byte = decoder->bin_buffer[decoder->pos];
+	instruction_t instruction = {};
+
 	if (byte >> 4 == 0b1011) {
-		return mov_immed_to_reg(decoder);
+		instruction = mov_immed_to_reg(decoder);
+		return instruction;
 	}
 
 	switch (byte >> 2) {
 		case 0b100010: {
-			return mod_regm_reg(decoder, OP_MOV);
+			instruction = mod_regm_reg(decoder, OP_MOV);
+			break;
 		}
 		case 0b000000: {
-			return mod_regm_reg(decoder, OP_ADD);
+			instruction = mod_regm_reg(decoder, OP_ADD);
+			break;
 		}
 		case 0b100000: {
-			return immed_to_regm(decoder);
+			instruction = immed_to_regm(decoder);
+			break;
 		}
 		case 0b001010: {
-			return mod_regm_reg(decoder, OP_SUB);
+			instruction = mod_regm_reg(decoder, OP_SUB);
+			break;
 		}
 		case 0b001110: {
-			return mod_regm_reg(decoder, OP_CMP);
+			instruction = mod_regm_reg(decoder, OP_CMP);
+			break;
 		}
 	}
+
 	switch (byte >> 1) {
 		case 0b0000010: {
-			return immed_to_acc(decoder, OP_ADD);
+			instruction = immed_to_acc(decoder, OP_ADD);
+			break;
 		}
 		case 0b0010110: {
-			return immed_to_acc(decoder, OP_SUB);
+			instruction = immed_to_acc(decoder, OP_SUB);
+			break;
 		}
 		case 0b0011110: {
-			return immed_to_acc(decoder, OP_CMP);
+			instruction = immed_to_acc(decoder, OP_CMP);
+			break;
 		}
 	}
 
 	switch (byte) {
 		case 0b01110101: {
-			return jmp_opcode(decoder, OP_JNZ);
+			instruction = jmp_opcode(decoder, OP_JNZ);
+			break;
 		}
 		case 0b01110100: {
-			return jmp_opcode(decoder, OP_JNE);
+			instruction = jmp_opcode(decoder, OP_JNE);
+			break;
 		}
 		case 0b01111100: {
-			return jmp_opcode(decoder, OP_JL);
+			instruction = jmp_opcode(decoder, OP_JL);
+			break;
 		}
 		case 0b01111110: {
-			return jmp_opcode(decoder, OP_JLE);
+			instruction = jmp_opcode(decoder, OP_JLE);
+			break;
 		}
 		case 0b01110010: {
-			return jmp_opcode(decoder, OP_JB);
+			instruction = jmp_opcode(decoder, OP_JB);
+			break;
 		}
 		case 0b01110110: {
-			return jmp_opcode(decoder, OP_JBE);
+			instruction = jmp_opcode(decoder, OP_JBE);
+			break;
 		}
 		case 0b01111010: {
-			return jmp_opcode(decoder, OP_JP);
+			instruction = jmp_opcode(decoder, OP_JP);
+			break;
 		}
 		case 0b01110000: {
-			return jmp_opcode(decoder, OP_JO);
+			instruction = jmp_opcode(decoder, OP_JO);
+			break;
 		}
 		case 0b01111000: {
-			return jmp_opcode(decoder, OP_JS);
+			instruction = jmp_opcode(decoder, OP_JS);
+			break;
 		}
 		case 0b01111101: {
-			return jmp_opcode(decoder, OP_JNL);
+			instruction = jmp_opcode(decoder, OP_JNL);
+			break;
 		}
 		case 0b01111111: {
-			return jmp_opcode(decoder, OP_JG);
+			instruction = jmp_opcode(decoder, OP_JG);
+			break;
 		}
 		case 0b01110011: {
-			return jmp_opcode(decoder, OP_JNB);
+			instruction = jmp_opcode(decoder, OP_JNB);
+			break;
 		}
 		case 0b01110111: {
-			return jmp_opcode(decoder, OP_JA);
+			instruction = jmp_opcode(decoder, OP_JA);
+			break;
 		}
 		case 0b01111011: {
-			return jmp_opcode(decoder, OP_JNP);
+			instruction = jmp_opcode(decoder, OP_JNP);
+			break;
 		}
 		case 0b01110001: {
-			return jmp_opcode(decoder, OP_JNO);
+			instruction = jmp_opcode(decoder, OP_JNO);
+			break;
 		}
 		case 0b01111001: {
-			return jmp_opcode(decoder, OP_JNS);
+			instruction = jmp_opcode(decoder, OP_JNS);
+			break;
 		}
 		case 0b11100010: {
-			return loop_opcode(decoder, LOOP_LOOP);
+			instruction = loop_opcode(decoder, LOOP_LOOP);
+			break;
 		}
 		case 0b11100001: {
-			return loop_opcode(decoder, LOOP_LOOPZ);
+			instruction = loop_opcode(decoder, LOOP_LOOPZ);
+			break;
 		}
 		case 0b11100000: {
-			return loop_opcode(decoder, LOOP_LOOPNZ);
+			instruction = loop_opcode(decoder, LOOP_LOOPNZ);
+			break;
 		}
 		case 0b11100011: {
-			return jmp_opcode(decoder, OP_JCXZ); // Assuming JCXZ is a jump opcode
+			instruction = jmp_opcode(decoder, OP_JCXZ);
+			break;
 		}
 	}
 
 	advance_decoder(decoder);
-	return (instruction_t){};
+	return instruction;
 }
+
 
 operand_t create_memory_operand(cpu_reg_t base, cpu_reg_t index,
 				int16_t displacement) {
@@ -377,8 +410,8 @@ instruction_t handle_mod_11(instruction_data_t instr, decoder_t *decoder) {
 
 instruction_t handle_mod_00(instruction_data_t instr, decoder_t *decoder) {
 	if (instr.d_s_bit) {
-		operand_t dest = create_register_operand_from_bits(instr.regm, instr.w_bit);
-		operand_t src = create_memory_operand_from_bits(instr.reg, 0);
+		operand_t dest = create_register_operand_from_bits(instr.reg, instr.w_bit); // WRONG
+		operand_t src = create_memory_operand_from_bits(instr.regm, 0);  // WRONG
 		return create_instruction(instr.operation, dest, src);
 
 		/*snprintf(decoder->output_buf + strlen(decoder->output_buf),*/
@@ -386,8 +419,8 @@ instruction_t handle_mod_00(instruction_data_t instr, decoder_t *decoder) {
 		/*	instr.operation, reg_to_string(instr.reg, instr.w_bit),*/
 		/*	regm_to_addr(instr.regm));*/
 	} else {
-		operand_t dest = create_memory_operand_from_bits(instr.reg, 0);
-		operand_t src = create_register_operand_from_bits(instr.regm, instr.w_bit);
+		operand_t dest = create_memory_operand_from_bits(instr.regm, 0);  // WRONG
+		operand_t src = create_register_operand_from_bits(instr.reg, instr.w_bit);  // WRONG
 		return create_instruction(instr.operation, dest, src);
 		/*snprintf(decoder->output_buf + strlen(decoder->output_buf),*/
 		/*	BUFSIZ - strlen(decoder->output_buf), "%s [%s], %s",*/
@@ -448,22 +481,35 @@ instruction_t handle_mod_10(instruction_data_t instr, decoder_t *decoder) {
 instruction_t handle_mod_11_immed(instruction_data_t instr,
 				  decoder_t *decoder) {
 	advance_decoder(decoder);
-	
-	uint16_t data;
-	if (instr.d_s_bit == 0 && instr.w_bit == 1) {
+	int16_t data;
+	if (instr.w_bit == 1) {
 		uint8_t data_lo = decoder->bin_buffer[decoder->pos];
 		advance_decoder(decoder);
 		uint8_t data_hi = decoder->bin_buffer[decoder->pos];
-		int16_t data = (int16_t)(data_hi << 8) | data_lo;
+		data = (int16_t)((data_hi << 8) | data_lo);
+	} else {
+		// Sign extend if s_bit is set
+		if (instr.d_s_bit) {
+		    data = (int8_t)decoder->bin_buffer[decoder->pos];
+		} else {
+		    data = decoder->bin_buffer[decoder->pos];
+		}
+	}
+	/*uint16_t data;*/
+	/*if (instr.d_s_bit == 0 && instr.w_bit == 1) {*/
+	/*	uint8_t data_lo = decoder->bin_buffer[decoder->pos];*/
+	/*	advance_decoder(decoder);*/
+	/*	uint8_t data_hi = decoder->bin_buffer[decoder->pos];*/
+	/*	data = (int16_t)(data_hi << 8) | data_lo;*/
 		/*snprintf(decoder->output_buf + strlen(decoder->output_buf),*/
 		/*  BUFSIZ - strlen(decoder->output_buf), "%s %s, %i", instr.operation,*/
 		/*  reg_to_string(instr.regm, instr.w_bit), data);*/
-	} else {
-		uint8_t data = decoder->bin_buffer[decoder->pos];
+	/*} else {*/
+	/*	data = decoder->bin_buffer[decoder->pos];*/
 		/*snprintf(decoder->output_buf + strlen(decoder->output_buf),*/
 		/*  BUFSIZ - strlen(decoder->output_buf), "%s %s, %u", instr.operation,*/
 		/*  reg_to_string(instr.regm, instr.w_bit), data);*/
-	}
+	/*}*/
 	operand_t dest = create_register_operand_from_bits(instr.reg, instr.w_bit);
 	operand_t src = create_immediate_operand(data);
 	return create_instruction(instr.operation, dest, src);
@@ -553,7 +599,7 @@ instruction_t handle_mod_10_immed(instruction_data_t instr,
 }
 
 void advance_decoder(decoder_t *decoder) {
-	/*print_position(decoder->bin_buffer, decoder->pos);*/
+	print_position(decoder->bin_buffer, decoder->pos);
 	decoder->pos++;
 }
 
