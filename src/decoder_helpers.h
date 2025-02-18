@@ -49,6 +49,17 @@ typedef enum Operation {
 	LOOP_LOOP, LOOP_LOOPZ, LOOP_LOOPNZ
 } operation_t;
 
+static const char *const op_names[] = {
+    [OP_MOV] = "mov",     [OP_ADD] = "add",     [OP_SUB] = "sub",     [OP_CMP] = "cmp",
+    [OP_JMP] = "jmp",     [OP_JNZ] = "jnz",     [OP_JB] = "jb",
+    [OP_JE] = "je",       [OP_JNE] = "jne",     [OP_JL] = "jl",      [OP_JLE] = "jle",
+    [OP_JG] = "jg",       [OP_JGE] = "jge",     [OP_JBE] = "jbe",    [OP_JP] = "jp",
+    [OP_JO] = "jo",       [OP_JS] = "js",       [OP_JNL] = "jnl",    [OP_JA] = "ja",
+    [OP_JNB] = "jnb",     [OP_JNP] = "jnp",     [OP_JNO] = "jno",    [OP_JNS] = "jns",
+    [OP_JCXZ] = "jcxz",
+    [LOOP_LOOP] = "loop", [LOOP_LOOPZ] = "loopz", [LOOP_LOOPNZ] = "loopnz"
+};
+
 typedef struct InstructionData {
 	operation_t operation;
 	uint8_t d_s_bit;

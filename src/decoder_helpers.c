@@ -624,11 +624,6 @@ byte_t *read_binary_file(const char *file_path, size_t *bin_size) {
 	return bin_buffer;
 }
 
-static const char *const op_names[] = {
-	[OP_MOV] = "mov", [OP_ADD] = "add", [OP_SUB] = "sub", [OP_CMP] = "cmp", [OP_JMP] = "jmp",
-	[OP_JE] = "je",   [OP_JNE] = "jne", [OP_JL] = "jl",   [OP_JLE] = "jle",
-	[OP_JG] = "jg",   [OP_JGE] = "jge"};
-
 static void format_memory_address(char *buf, size_t size,
 				  const memory_address_t *addr) {
 	int pos = 0;
