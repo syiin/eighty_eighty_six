@@ -98,6 +98,7 @@ typedef struct Operand {
 
 typedef struct Instruction {
 	operation_t op;
+	uint8_t w_bit;
 	operand_t dest;
 	operand_t src;
 } instruction_t;
