@@ -14,20 +14,40 @@ typedef union {
 	} byte;
 } general_reg_t;
 
+/*#define GENERAL_REG_MACRO(macro) \*/
+/*	macro(ax) \*/
+/*	macro(bx) \*/
+/*	macro(cx) \*/
+/*	macro(dx)*/
+/**/
+/*#define POINTER_INDEX_MACRO(macro) \*/
+/*	macro(sp) \*/
+/*	macro(bp) \*/
+/*	macro(si) \*/
+/*	macro(di)*/
+
+
+#define GENERAL_REGISTERS \
+	REGISTER(ax) \
+	REGISTER(bx) \
+	REGISTER(cx) \
+	REGISTER(dx)
+
+#define POINTER_REGISTERS \
+	REGISTER(sp) \
+	REGISTER(bp) \
+	REGISTER(si) \
+	REGISTER(di)
+
 typedef struct {
-	// General purpose registers
-	general_reg_t ax;
-	general_reg_t bx;
-	general_reg_t cx;
-	general_reg_t dx;
+	#define REGISTER(reg) general_reg_t reg;
+	GENERAL_REGISTERS;
+	#undef REGISTER
 
-	// Pointer and index registers (these are only 16-bit)
-	uint16_t sp;
-	uint16_t bp;
-	uint16_t si;
-	uint16_t di;
+	#define REGISTER(reg) uint16_t reg;
+	POINTER_REGISTERS;
+	#undef REGISTER
 
-	// Flags register
 	uint16_t flags;
 } cpu_state_t;
 
@@ -86,3 +106,19 @@ void handle_mov(instruction_t instr) {
 	}
 }
 
+void format_cpu_state(instruction_t instr){
+	printf("Final registers");
+	#define REGISTER(reg) printf("  %s: 0x%04X (high: 0x%02X, low: 0x%02X)\n", \
+		#reg, \
+		cpu.reg.x, \
+		cpu.reg.byte.h, \
+		cpu.reg.byte.l);
+	GENERAL_REGISTERS
+	#undef REGISTER
+		
+	#define REGISTER(reg) printf("  %s: 0x%04X\n", \
+		#reg, \
+		cpu.reg);
+	POINTER_REGISTERS
+	#undef REGISTER
+}

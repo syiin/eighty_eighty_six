@@ -688,16 +688,16 @@ void format_instruction(const instruction_t *instr) {
     if (instr->op == OP_JMP || instr->op == OP_JE || instr->op == OP_JNE ||
         instr->op == OP_JL || instr->op == OP_JLE || instr->op == OP_JG ||
         instr->op == OP_JGE) {
-        printf("%s %s\n", op_names[instr->op], dest_buf);
+        printf("%s %s", op_names[instr->op], dest_buf);
     }
     // Only add size prefix for immediate to memory operations
     else if (instr->src.type == OPERAND_IMMEDIATE && instr->dest.type == OPERAND_MEMORY) {
         const char *size_ptr = instr->w_bit ? "word" : "byte";
-        printf("%s %s %s, %s\n", op_names[instr->op], size_ptr, dest_buf, src_buf);
+        printf("%s %s %s, %s", op_names[instr->op], size_ptr, dest_buf, src_buf);
     }
     // Default case - no size prefix needed
     else {
-        printf("%s %s, %s\n", op_names[instr->op], dest_buf, src_buf);
+        printf("%s %s, %s", op_names[instr->op], dest_buf, src_buf);
     }
 }
 

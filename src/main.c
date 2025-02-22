@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
 		/*strcpy(decoder.output_buf, "");*/
 		instruction_t instruction = parse_instruction(&decoder);
 		format_instruction(&instruction);
+		printf("\n");
 		/*printf("%s\n", decoder.output_buf);*/
 	}
 }
