@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "decoder_helpers.h"
+#include "simulator.h"
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
@@ -26,13 +27,12 @@ int main(int argc, char *argv[]) {
 	};
 
 	while (decoder.pos < bin_size - 1){
-		/*strcpy(decoder.output_buf, "");*/
 		instruction_t instruction = parse_instruction(&decoder);
 		format_instruction(&instruction);
 		printf("\n");
 		
 		eval_instruction(instruction);
-		/*printf("%s\n", decoder.output_buf);*/
 	}
+	format_cpu_state();
 }
 

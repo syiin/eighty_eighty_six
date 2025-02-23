@@ -67,18 +67,20 @@ void eval_instruction(instruction_t instr) {
 	}
 }
 
-void format_cpu_state(instruction_t instr){
-	printf("Final registers");
-	#define REGISTER(reg) printf("  %s: 0x%04X (high: 0x%02X, low: 0x%02X)\n", \
+void format_cpu_state(){
+	printf("Final registers\n");
+	#define REGISTER(reg) printf("  %s: 0x%04X (high: 0x%02X, low: 0x%02X) (%d)\n", \
 		#reg, \
 		cpu.reg.x, \
 		cpu.reg.byte.h, \
-		cpu.reg.byte.l);
+		cpu.reg.byte.l, \
+		cpu.reg.x);
 	GENERAL_REGISTERS
 	#undef REGISTER
 		
-	#define REGISTER(reg) printf("  %s: 0x%04X\n", \
+	#define REGISTER(reg) printf("  %s: 0x%04X (%d)\n", \
 		#reg, \
+		cpu.reg, \
 		cpu.reg);
 	POINTER_REGISTERS
 	#undef REGISTER

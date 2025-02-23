@@ -2,6 +2,7 @@
 #define SIMULATOR_H
 
 #include <stdint.h>
+#include "decoder_helpers.h"
 
 typedef union {
 	uint16_t x;  // Full 16-bit register
@@ -41,5 +42,8 @@ typedef struct {
 } cpu_state_t;
 
 static cpu_state_t cpu;
+
+void eval_instruction(instruction_t instr);
+void format_cpu_state();
 
 #endif
