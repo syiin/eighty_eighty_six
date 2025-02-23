@@ -30,6 +30,8 @@ int main(int argc, char *argv[]) {
 		instruction_t instruction = parse_instruction(&decoder);
 		format_instruction(&instruction);
 		printf("\n");
+		
+		eval_instruction(instruction);
 		/*printf("%s\n", decoder.output_buf);*/
 	}
 }
