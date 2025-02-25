@@ -33,10 +33,17 @@ uint16_t evaluate_src(operand_t src) {
 	}
 }
 
-void handle_mov(instruction_t instr) {
+void eval_instruction(instruction_t instr) {
 	uint16_t src_value = evaluate_src(instr.src);
 
-	register_data_t prev_data = get_register_data(instr.dest.value.reg);
+	register_data_t prev_data;
+	switch (instr.op){
+		case OP_MOV:{
+			prev_data = get_register_data(instr.dest.value.reg);
+		}
+		default:
+			break;
+	}
 
 	switch(instr.dest.value.reg) {
 		case REG_AX: cpu.ax.x = src_value; break;
@@ -55,6 +62,7 @@ void handle_mov(instruction_t instr) {
 		case REG_CL: cpu.cx.byte.l = (uint8_t)src_value; break;
 		case REG_DH: cpu.dx.byte.h = (uint8_t)src_value; break;
 		case REG_DL: cpu.dx.byte.l = (uint8_t)src_value; break;
+		default: break;
 	}
 
 	if (prev_data.is_8bit){
@@ -68,17 +76,17 @@ void handle_mov(instruction_t instr) {
 	}
 }
 
-void eval_instruction(instruction_t instr) {
-	switch(instr.op){
-		case OP_MOV: {
-			handle_mov(instr);
-			break;
-		}
-		default: {
-			break;
-		}
-	}
-}
+/*void eval_instruction(instruction_t instr) {*/
+/*	switch(instr.op){*/
+/*		case OP_MOV: {*/
+/*			handle_mov(instr);*/
+/*			break;*/
+/*		}*/
+/*		default: {*/
+/*			break;*/
+/*		}*/
+/*	}*/
+/*}*/
 
 register_data_t get_register_data(register_t reg) {
 	register_data_t info = {
