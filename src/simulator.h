@@ -18,32 +18,41 @@ typedef union {
 } general_reg_t;
 
 #define GENERAL_REGISTERS \
-	REGISTER(ax) \
-	REGISTER(bx) \
-	REGISTER(cx) \
-	REGISTER(dx)
+REGISTER(ax) \
+REGISTER(bx) \
+REGISTER(cx) \
+REGISTER(dx)
 
 #define POINTER_REGISTERS \
-	REGISTER(sp) \
-	REGISTER(bp) \
-	REGISTER(si) \
-	REGISTER(di)
+REGISTER(sp) \
+REGISTER(bp) \
+REGISTER(si) \
+REGISTER(di)
 
 typedef struct {
-	#define REGISTER(reg) general_reg_t reg;
+#define REGISTER(reg) general_reg_t reg;
 	GENERAL_REGISTERS;
 	#undef REGISTER
 
-	#define REGISTER(reg) uint16_t reg;
+#define REGISTER(reg) uint16_t reg;
 	POINTER_REGISTERS;
 	#undef REGISTER
 
 	uint16_t flags;
 } cpu_state_t;
 
+typedef struct {
+	const char* name;
+	uint16_t value;
+	bool is_8bit;
+} register_data_t;
+
 static cpu_state_t cpu;
 
 void eval_instruction(instruction_t instr);
 void format_cpu_state();
+void handle_mov(instruction_t instr);
+uint16_t evaluate_src(operand_t src);
+register_data_t get_register_data(register_t reg);
 
 #endif
