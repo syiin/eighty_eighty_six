@@ -33,19 +33,29 @@ uint16_t evaluate_src(operand_t src) {
 	}
 }
 
-void eval_instruction(instruction_t instr) {
+void handle_mov(instruction_t instr) {
 	uint16_t src_value = evaluate_src(instr.src);
 
-	register_data_t prev_data;
-	switch (instr.op){
-		case OP_MOV:{
-			prev_data = get_register_data(instr.dest.value.reg);
-		}
-		default:
-			break;
-	}
+	register_data_t prev_data = get_register_data(instr.dest.value.reg);
+	set_register_data(instr.dest.value.reg, src_value);
 
-	switch(instr.dest.value.reg) {
+	format_reg_before_after(prev_data, src_value);
+}
+
+void eval_instruction(instruction_t instr) {
+	switch(instr.op){
+		case OP_MOV: {
+			handle_mov(instr);
+			break;
+		}
+		default: {
+			break;
+		}
+	}
+}
+
+void set_register_data(register_t reg, uint16_t src_value){
+	switch(reg) {
 		case REG_AX: cpu.ax.x = src_value; break;
 		case REG_BX: cpu.bx.x = src_value; break;
 		case REG_CX: cpu.cx.x = src_value; break;
@@ -62,31 +72,8 @@ void eval_instruction(instruction_t instr) {
 		case REG_CL: cpu.cx.byte.l = (uint8_t)src_value; break;
 		case REG_DH: cpu.dx.byte.h = (uint8_t)src_value; break;
 		case REG_DL: cpu.dx.byte.l = (uint8_t)src_value; break;
-		default: break;
-	}
-
-	if (prev_data.is_8bit){
-		if (prev_data.value != ( src_value  & 0xFF)) {
-			printf("%s: 0x%02X -> 0x%02X\n", prev_data.name, prev_data.value, src_value & 0xFF);
-		}
-	} else {
-		if (prev_data.value != ( src_value  & 0xFF)) {
-			printf("%s: 0x%04X -> 0x%04X\n", prev_data.name, prev_data.value, src_value & 0xFF);
-		}
 	}
 }
-
-/*void eval_instruction(instruction_t instr) {*/
-/*	switch(instr.op){*/
-/*		case OP_MOV: {*/
-/*			handle_mov(instr);*/
-/*			break;*/
-/*		}*/
-/*		default: {*/
-/*			break;*/
-/*		}*/
-/*	}*/
-/*}*/
 
 register_data_t get_register_data(register_t reg) {
 	register_data_t info = {
@@ -115,6 +102,18 @@ register_data_t get_register_data(register_t reg) {
 	}
 
 	return info;
+}
+
+void format_reg_before_after(register_data_t prev_data, uint16_t src_value){
+	if (prev_data.is_8bit){
+		if (prev_data.value != ( src_value  & 0xFF)) {
+			printf("%s: 0x%02X -> 0x%02X\n", prev_data.name, prev_data.value, src_value & 0xFF);
+		}
+	} else {
+		if (prev_data.value != ( src_value  & 0xFF)) {
+			printf("%s: 0x%04X -> 0x%04X\n", prev_data.name, prev_data.value, src_value & 0xFF);
+		}
+	}
 }
 
 void format_cpu_state(){
