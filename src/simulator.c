@@ -35,11 +35,19 @@ uint16_t evaluate_src(operand_t src) {
 
 void handle_mov(instruction_t instr) {
 	uint16_t src_value = evaluate_src(instr.src);
-
 	register_data_t prev_data = get_register_data(instr.dest.value.reg);
 	set_register_data(instr.dest.value.reg, src_value);
 
 	format_reg_before_after(prev_data, src_value);
+}
+
+void handle_sub(instruction_t instr){
+	register_data_t prev_data = get_register_data(instr.dest.value.reg);
+	uint16_t src_value = evaluate_src(instr.src);
+	uint16_t result = prev_data.value - src_value;
+	set_register_data(instr.dest.value.reg, result);
+
+	format_reg_before_after(prev_data, result);
 }
 
 void eval_instruction(instruction_t instr) {
@@ -48,6 +56,7 @@ void eval_instruction(instruction_t instr) {
 			handle_mov(instr);
 			break;
 		}
+		case OP_SUB: handle_sub(instr);
 		default: {
 			break;
 		}

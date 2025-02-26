@@ -52,8 +52,10 @@ static cpu_state_t cpu;
 void eval_instruction(instruction_t instr);
 void format_cpu_state();
 void handle_mov(instruction_t instr);
+void handle_sub(instruction_t instr);
 uint16_t evaluate_src(operand_t src);
 register_data_t get_register_data(register_t reg);
 void set_register_data(register_t reg, uint16_t src_value);
 void format_reg_before_after(register_data_t prev_data, uint16_t src_value);
+
 #endif
