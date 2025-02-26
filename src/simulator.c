@@ -119,8 +119,8 @@ void format_reg_before_after(register_data_t prev_data, uint16_t src_value){
 			printf("%s: 0x%02X -> 0x%02X\n", prev_data.name, prev_data.value, src_value & 0xFF);
 		}
 	} else {
-		if (prev_data.value != ( src_value  & 0xFF)) {
-			printf("%s: 0x%04X -> 0x%04X\n", prev_data.name, prev_data.value, src_value & 0xFF);
+		if (prev_data.value != ( src_value)) {
+			printf("%s: 0x%04X -> 0x%04X\n", prev_data.name, prev_data.value, src_value);
 		}
 	}
 }
