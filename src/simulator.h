@@ -29,6 +29,9 @@ REGISTER(bp) \
 REGISTER(si) \
 REGISTER(di)
 
+#define FLAG_ZF (1 << 6)	// Zero Flag (bit 6)
+#define FLAG_SF (1 << 7)	// Sign Flag (bit 7)
+
 typedef struct {
 #define REGISTER(reg) general_reg_t reg;
 	GENERAL_REGISTERS;
