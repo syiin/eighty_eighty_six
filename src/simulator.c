@@ -50,13 +50,20 @@ void handle_sub(instruction_t instr){
 	format_reg_before_after(prev_data, result);
 }
 
+void handle_add(instruction_t instr){
+	register_data_t prev_data = get_register_data(instr.dest.value.reg);
+	uint16_t src_value = evaluate_src(instr.src);
+	uint16_t result = prev_data.value + src_value;
+	set_register_data(instr.dest.value.reg, result);
+
+	format_reg_before_after(prev_data, result);
+}
+
 void eval_instruction(instruction_t instr) {
 	switch(instr.op){
-		case OP_MOV: {
-			handle_mov(instr);
-			break;
-		}
+		case OP_MOV: handle_mov(instr);
 		case OP_SUB: handle_sub(instr);
+		case OP_ADD: handle_add(instr);
 		default: {
 			break;
 		}
