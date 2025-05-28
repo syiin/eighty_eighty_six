@@ -1,6 +1,6 @@
 # 8086 Simulator
 
-This is an 8086 CPU simulator that can decode and execute basic 8086 assembly instructions from binary files.
+This is an 8086 CPU simulator that can decode and execute basic 8086 assembly instructions from binary files. Following https://www.computerenhance.com/p
 
 ## Features
 
