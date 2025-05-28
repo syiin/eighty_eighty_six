@@ -20,12 +20,6 @@ The simulator currently supports:
 │   ├── simulator.h         # CPU state definitions
 │   ├── decoder_helpers.c   # Instruction decoding
 │   └── decoder_helpers.h   # Decoder definitions
-├── listings/               # Test assembly files and binaries
-│   ├── listing_41          # Binary file
-│   ├── listing_41.asm      # Assembly source
-│   ├── listing_43          # Binary file
-│   ├── listing_43.asm      # Assembly source
-│   └── ...
 └── README.md              # This file
 ```
 
@@ -49,35 +43,17 @@ gcc main.c simulator.c decoder_helpers.c
 
 ### 2. Run the Simulator
 
-The simulator takes a binary file as input. You can use any of the pre-compiled binaries in the `listings/` directory:
+The simulator takes a binary file as input:
 
 ```bash
 # Using the compiled binary named 'simulator'
-./simulator ../listings/listing_41
+./simulator path/to/your/binary_file
 
 # Or using the default a.out name
-./a.out ../listings/listing_41
+./a.out path/to/your/binary_file
 ```
 
-### 3. Available Test Files
-
-The `listings/` directory contains several test files:
-
-- `listing_41` - Basic ADD and SUB operations
-- `listing_43` - More complex operations  
-- `listing_46` - Additional test cases
-- `39_mine` - Custom test case
-- `41_mine` - Custom test case
-
-Example usage with different files:
-
-```bash
-./simulator ../listings/listing_43
-./simulator ../listings/listing_46
-./simulator ../listings/39_mine
-```
-
-### 4. Understanding the Output
+### 3. Understanding the Output
 
 The simulator will:
 1. Decode each instruction and print it in assembly format
@@ -89,7 +65,7 @@ Example output:
 mov cx, bx
 CX: 0x0000 -> 0x0000
 
-add bx, cx  
+add bx, cx
 BX: 0x0000 -> 0x0000
 
 Final registers
@@ -128,7 +104,7 @@ Currently implemented:
 
 The simulator supports all standard 8086 registers:
 - **16-bit General Purpose**: AX, BX, CX, DX
-- **16-bit Pointer/Index**: SP, BP, SI, DI  
+- **16-bit Pointer/Index**: SP, BP, SI, DI
 - **8-bit High**: AH, BH, CH, DH
 - **8-bit Low**: AL, BL, CL, DL
 
