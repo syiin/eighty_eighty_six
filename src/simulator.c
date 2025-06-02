@@ -243,23 +243,23 @@ void handle_sub(instruction_t instr)
 	uint16_t result = prev_data.value - src_value;
 	set_register_data(instr.dest.value.reg, result);
 
-	if (result == 0)
-	{
-		cpu.flags |= FLAG_ZF;
-	}
-	else
-	{
-		cpu.flags &= ~FLAG_ZF;
-	}
+	// if (result == 0)
+	// {
+	// 	cpu.flags |= FLAG_ZF;
+	// }
+	// else
+	// {
+	// 	cpu.flags &= ~FLAG_ZF;
+	// }
 
-	if (result & 0x8000)
-	{
-		cpu.flags |= FLAG_SF;
-	}
-	else
-	{
-		cpu.flags &= ~FLAG_SF;
-	}
+	// if (result & 0x8000)
+	// {
+	// 	cpu.flags |= FLAG_SF;
+	// }
+	// else
+	// {
+	// 	cpu.flags &= ~FLAG_SF;
+	// }
 
 	format_reg_before_after(prev_data, result);
 }
@@ -271,23 +271,23 @@ void handle_add(instruction_t instr)
 	uint16_t result = prev_data.value + src_value;
 	set_register_data(instr.dest.value.reg, result);
 
-	if (result == 0)
-	{
-		cpu.flags |= FLAG_ZF;
-	}
-	else
-	{
-		cpu.flags &= ~FLAG_ZF;
-	}
+	// if (result == 0)
+	// {
+	// 	cpu.flags |= FLAG_ZF;
+	// }
+	// else
+	// {
+	// 	cpu.flags &= ~FLAG_ZF;
+	// }
 
-	if (result & 0x8000)
-	{
-		cpu.flags |= FLAG_SF;
-	}
-	else
-	{
-		cpu.flags &= ~FLAG_SF;
-	}
+	// if (result & 0x8000)
+	// {
+	// 	cpu.flags |= FLAG_SF;
+	// }
+	// else
+	// {
+	// 	cpu.flags &= ~FLAG_SF;
+	// }
 
 	format_reg_before_after(prev_data, result);
 }
@@ -317,6 +317,11 @@ void handle_cmp(instruction_t instr)
 	{
 		cpu.flags &= ~FLAG_SF;
 	}
+	format_cpu_flags();
+}
+
+void format_cpu_flags(){
+	printf("flags: 0x%04X (zero: %d, sign: %d)\n", cpu.flags, (cpu.flags & FLAG_ZF) != 0, (cpu.flags & FLAG_SF) != 0);
 }
 
 void format_reg_before_after(register_data_t prev_data, uint16_t src_value)
