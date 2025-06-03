@@ -57,7 +57,9 @@ typedef struct
 static cpu_state_t cpu;
 
 void eval_instruction(instruction_t instr);
+void process_cpu_flags(uint16_t result);
 void format_cpu_state();
+void format_cpu_flags();
 void handle_mov(instruction_t instr);
 void handle_add(instruction_t instr);
 void handle_sub(instruction_t instr);

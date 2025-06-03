@@ -243,23 +243,7 @@ void handle_sub(instruction_t instr)
 	uint16_t result = prev_data.value - src_value;
 	set_register_data(instr.dest.value.reg, result);
 
-	// if (result == 0)
-	// {
-	// 	cpu.flags |= FLAG_ZF;
-	// }
-	// else
-	// {
-	// 	cpu.flags &= ~FLAG_ZF;
-	// }
-
-	// if (result & 0x8000)
-	// {
-	// 	cpu.flags |= FLAG_SF;
-	// }
-	// else
-	// {
-	// 	cpu.flags &= ~FLAG_SF;
-	// }
+	process_cpu_flags(result);
 
 	format_reg_before_after(prev_data, result);
 }
@@ -271,23 +255,7 @@ void handle_add(instruction_t instr)
 	uint16_t result = prev_data.value + src_value;
 	set_register_data(instr.dest.value.reg, result);
 
-	// if (result == 0)
-	// {
-	// 	cpu.flags |= FLAG_ZF;
-	// }
-	// else
-	// {
-	// 	cpu.flags &= ~FLAG_ZF;
-	// }
-
-	// if (result & 0x8000)
-	// {
-	// 	cpu.flags |= FLAG_SF;
-	// }
-	// else
-	// {
-	// 	cpu.flags &= ~FLAG_SF;
-	// }
+	process_cpu_flags(result);
 
 	format_reg_before_after(prev_data, result);
 }
@@ -298,7 +266,10 @@ void handle_cmp(instruction_t instr)
 	uint16_t src_value = evaluate_src(instr.src);
 	uint16_t result = prev_data.value - src_value;
 
-	// Set zero flag if result is zero
+	process_cpu_flags(result);
+}
+
+void process_cpu_flags(uint16_t result){
 	if (result == 0)
 	{
 		cpu.flags |= FLAG_ZF;
@@ -308,7 +279,6 @@ void handle_cmp(instruction_t instr)
 		cpu.flags &= ~FLAG_ZF;
 	}
 
-	// Set sign flag if result is negative
 	if (result & 0x8000)
 	{
 		cpu.flags |= FLAG_SF;
