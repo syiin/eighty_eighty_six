@@ -26,13 +26,14 @@ int main(int argc, char *argv[]) {
 		.bin_buffer = bin_buffer,
 	};
 
-	while (decoder.pos < bin_size - 1){
-		instruction_t instruction = parse_instruction(&decoder);
-		format_instruction(&instruction);
-		printf("\n");
-		
-		eval_instruction(instruction);
-	}
-	format_cpu_state();
+	simulator_t simulator = {
+			.cpu = cpu,
+			.decoder = &decoder,
+			.program_size = bin_size,
+	};
+
+	run_simulation(&simulator);
+	free(bin_buffer);
+	return 0;
 }
 

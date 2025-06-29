@@ -103,27 +103,11 @@ typedef struct Instruction {
 	operand_t src;
 } instruction_t;
 
-instruction_t parse_instruction(decoder_t *decoder);
-instruction_t mod_regm_reg(decoder_t *decoder, operation_t operation);
-instruction_t mov_immed_to_reg(decoder_t *decoder);
-instruction_t immed_to_regm(decoder_t *decoder);
-instruction_t immed_to_acc(decoder_t *decoder, operation_t operation);
 
-instruction_t handle_mod_11(instruction_data_t instr, decoder_t *decoder);
-instruction_t handle_mod_00(instruction_data_t instr, decoder_t *decoder);
-instruction_t handle_mod_01(instruction_data_t instr, decoder_t *decoder);
-instruction_t handle_mod_10(instruction_data_t instr, decoder_t *decoder);
-
-instruction_t handle_mod_11_immed(instruction_data_t instr, decoder_t *decoder);
-instruction_t handle_mod_00_immed(instruction_data_t instr, decoder_t *decoder);
-instruction_t handle_mod_10_immed(instruction_data_t instr, decoder_t *decoder);
-
-instruction_t jmp_opcode(decoder_t *decoder, operation_t operation);
-instruction_t loop_opcode(decoder_t *decoder, operation_t operation);
 
 char *regm_to_addr(int regm);
 char *reg_to_string(int reg, int is_16_bit);
-void advance_decoder(decoder_t *decoder);
+
 
 byte_t *read_binary_file(const char *file_path, size_t *bin_size);
 
@@ -131,8 +115,7 @@ void format_instruction(const instruction_t* inst);
 void print_encoding_to_int(char *encoding);
 void print_position(const byte_t *buffer, int pos);
 void byte_to_binary(uint8_t byte, char* binary);
-int slice_current_bits(decoder_t *decoder, int start, int end);
-int slice_peek_bits(decoder_t *decoder, int start, int end);
+
 int get_bits(int num, int start, int end);
 
 cpu_reg_t bits_to_reg(int reg, int is_16_bit);
