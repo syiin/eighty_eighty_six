@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "decoder_helpers.h"
 #include "simulator.h"
 
 int main(int argc, char *argv[]) {

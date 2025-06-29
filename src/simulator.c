@@ -1,4 +1,3 @@
-#include "decoder_helpers.h"
 #include "simulator.h"
 #include <stdint.h>
 #include <sys/types.h>
