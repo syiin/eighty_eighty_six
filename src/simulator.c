@@ -938,10 +938,6 @@ instruction_t handle_mod_10_immed(instruction_data_t instr,
 
 void advance_decoder(simulator_t *simulator) {
 	simulator->cpu.instr_ptr++;
-	if (simulator->cpu.instr_ptr >= simulator->program_size) {
-		// Prevent reading beyond program buffer
-		simulator->cpu.instr_ptr = simulator->program_size - 1;
-	}
 }
 
 byte_t *read_binary_file(const char *file_path, size_t *bin_size) {
