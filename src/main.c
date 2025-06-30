@@ -21,12 +21,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	decoder_t decoder = {
-		.pos = 0,
 		.bin_buffer = bin_buffer,
 	};
 
 	simulator_t simulator = {
-			.cpu = cpu,
+			.cpu = {
+				.flags = 0,
+				.instr_ptr = 0
+			},
 			.decoder = &decoder,
 			.program_size = bin_size,
 	};

@@ -12,12 +12,12 @@ void run_simulation(simulator_t *simulator)
 		format_instruction(&instruction);
 		printf("\n");
 
-		eval_instruction(instruction);
+		eval_instruction(instruction, simulator);
 	}
-	format_cpu_state();
+	format_cpu_state(simulator);
 }
 
-uint16_t evaluate_src(operand_t src)
+uint16_t evaluate_src(operand_t src, simulator_t *simulator)
 {
 	switch (src.type)
 	{
@@ -28,37 +28,37 @@ uint16_t evaluate_src(operand_t src)
 		switch (src.value.reg)
 		{
 		case REG_AX:
-			return cpu.ax.x;
+			return simulator->cpu.ax.x;
 		case REG_BX:
-			return cpu.bx.x;
+			return simulator->cpu.bx.x;
 		case REG_CX:
-			return cpu.cx.x;
+			return simulator->cpu.cx.x;
 		case REG_DX:
-			return cpu.dx.x;
+			return simulator->cpu.dx.x;
 		case REG_SP:
-			return cpu.sp;
+			return simulator->cpu.sp;
 		case REG_BP:
-			return cpu.bp;
+			return simulator->cpu.bp;
 		case REG_SI:
-			return cpu.si;
+			return simulator->cpu.si;
 		case REG_DI:
-			return cpu.di;
+			return simulator->cpu.di;
 		case REG_AH:
-			return cpu.ax.byte.h;
+			return simulator->cpu.ax.byte.h;
 		case REG_AL:
-			return cpu.ax.byte.l;
+			return simulator->cpu.ax.byte.l;
 		case REG_BH:
-			return cpu.bx.byte.h;
+			return simulator->cpu.bx.byte.h;
 		case REG_BL:
-			return cpu.bx.byte.l;
+			return simulator->cpu.bx.byte.l;
 		case REG_CH:
-			return cpu.cx.byte.h;
+			return simulator->cpu.cx.byte.h;
 		case REG_CL:
-			return cpu.cx.byte.l;
+			return simulator->cpu.cx.byte.l;
 		case REG_DH:
-			return cpu.dx.byte.h;
+			return simulator->cpu.dx.byte.h;
 		case REG_DL:
-			return cpu.dx.byte.l;
+			return simulator->cpu.dx.byte.l;
 		default:
 			return 0;
 		}
@@ -68,28 +68,28 @@ uint16_t evaluate_src(operand_t src)
 	}
 }
 
-void eval_instruction(instruction_t instr)
+void eval_instruction(instruction_t instr, simulator_t *simulator)
 {
 	switch (instr.op)
 	{
 		case OP_MOV:
 		{
-			handle_mov(instr);
+			handle_mov(instr, simulator);
 			break;
 		};
 		case OP_SUB:
 		{
-			handle_sub(instr);
+			handle_sub(instr, simulator);
 			break;
 		};
 		case OP_ADD:
 		{
-			handle_add(instr);
+			handle_add(instr, simulator);
 			break;
 		};
 		case OP_CMP:
 		{
-			handle_cmp(instr);
+			handle_cmp(instr, simulator);
 			break;
 		};
 		default:
@@ -99,62 +99,62 @@ void eval_instruction(instruction_t instr)
 	}
 }
 
-void set_register_data(register_t reg, uint16_t src_value)
+void set_register_data(register_t reg, uint16_t src_value, simulator_t *simulator)
 {
 	switch (reg)
 	{
 	case REG_AX:
-		cpu.ax.x = src_value;
+		simulator->cpu.ax.x = src_value;
 		break;
 	case REG_BX:
-		cpu.bx.x = src_value;
+		simulator->cpu.bx.x = src_value;
 		break;
 	case REG_CX:
-		cpu.cx.x = src_value;
+		simulator->cpu.cx.x = src_value;
 		break;
 	case REG_DX:
-		cpu.dx.x = src_value;
+		simulator->cpu.dx.x = src_value;
 		break;
 	case REG_SP:
-		cpu.sp = src_value;
+		simulator->cpu.sp = src_value;
 		break;
 	case REG_BP:
-		cpu.bp = src_value;
+		simulator->cpu.bp = src_value;
 		break;
 	case REG_SI:
-		cpu.si = src_value;
+		simulator->cpu.si = src_value;
 		break;
 	case REG_DI:
-		cpu.di = src_value;
+		simulator->cpu.di = src_value;
 		break;
 	case REG_AH:
-		cpu.ax.byte.h = (uint8_t)src_value;
+		simulator->cpu.ax.byte.h = (uint8_t)src_value;
 		break;
 	case REG_AL:
-		cpu.ax.byte.l = (uint8_t)src_value;
+		simulator->cpu.ax.byte.l = (uint8_t)src_value;
 		break;
 	case REG_BH:
-		cpu.bx.byte.h = (uint8_t)src_value;
+		simulator->cpu.bx.byte.h = (uint8_t)src_value;
 		break;
 	case REG_BL:
-		cpu.bx.byte.l = (uint8_t)src_value;
+		simulator->cpu.bx.byte.l = (uint8_t)src_value;
 		break;
 	case REG_CH:
-		cpu.cx.byte.h = (uint8_t)src_value;
+		simulator->cpu.cx.byte.h = (uint8_t)src_value;
 		break;
 	case REG_CL:
-		cpu.cx.byte.l = (uint8_t)src_value;
+		simulator->cpu.cx.byte.l = (uint8_t)src_value;
 		break;
 	case REG_DH:
-		cpu.dx.byte.h = (uint8_t)src_value;
+		simulator->cpu.dx.byte.h = (uint8_t)src_value;
 		break;
 	case REG_DL:
-		cpu.dx.byte.l = (uint8_t)src_value;
+		simulator->cpu.dx.byte.l = (uint8_t)src_value;
 		break;
 	}
 }
 
-register_data_t get_register_data(register_t reg)
+register_data_t get_register_data(register_t reg, simulator_t *simulator)
 {
 	register_data_t info = {
 			.name = "UNKNOWN",
@@ -165,74 +165,74 @@ register_data_t get_register_data(register_t reg)
 	{
 	case REG_AX:
 		info.name = "AX";
-		info.value = cpu.ax.x;
+		info.value = simulator->cpu.ax.x;
 		break;
 	case REG_BX:
 		info.name = "BX";
-		info.value = cpu.bx.x;
+		info.value = simulator->cpu.bx.x;
 		break;
 	case REG_CX:
 		info.name = "CX";
-		info.value = cpu.cx.x;
+		info.value = simulator->cpu.cx.x;
 		break;
 	case REG_DX:
 		info.name = "DX";
-		info.value = cpu.dx.x;
+		info.value = simulator->cpu.dx.x;
 		break;
 	case REG_SP:
 		info.name = "SP";
-		info.value = cpu.sp;
+		info.value = simulator->cpu.sp;
 		break;
 	case REG_BP:
 		info.name = "BP";
-		info.value = cpu.bp;
+		info.value = simulator->cpu.bp;
 		break;
 	case REG_SI:
 		info.name = "SI";
-		info.value = cpu.si;
+		info.value = simulator->cpu.si;
 		break;
 	case REG_DI:
 		info.name = "DI";
-		info.value = cpu.di;
+		info.value = simulator->cpu.di;
 		break;
 	case REG_AH:
 		info.name = "AH";
-		info.value = cpu.ax.byte.h;
+		info.value = simulator->cpu.ax.byte.h;
 		info.is_8bit = true;
 		break;
 	case REG_AL:
 		info.name = "AL";
-		info.value = cpu.ax.byte.l;
+		info.value = simulator->cpu.ax.byte.l;
 		info.is_8bit = true;
 		break;
 	case REG_BH:
 		info.name = "BH";
-		info.value = cpu.bx.byte.h;
+		info.value = simulator->cpu.bx.byte.h;
 		info.is_8bit = true;
 		break;
 	case REG_BL:
 		info.name = "BL";
-		info.value = cpu.bx.byte.l;
+		info.value = simulator->cpu.bx.byte.l;
 		info.is_8bit = true;
 		break;
 	case REG_CH:
 		info.name = "CH";
-		info.value = cpu.cx.byte.h;
+		info.value = simulator->cpu.cx.byte.h;
 		info.is_8bit = true;
 		break;
 	case REG_CL:
 		info.name = "CL";
-		info.value = cpu.cx.byte.l;
+		info.value = simulator->cpu.cx.byte.l;
 		info.is_8bit = true;
 		break;
 	case REG_DH:
 		info.name = "DH";
-		info.value = cpu.dx.byte.h;
+		info.value = simulator->cpu.dx.byte.h;
 		info.is_8bit = true;
 		break;
 	case REG_DL:
 		info.name = "DL";
-		info.value = cpu.dx.byte.l;
+		info.value = simulator->cpu.dx.byte.l;
 		info.is_8bit = true;
 		break;
 	}
@@ -241,71 +241,71 @@ register_data_t get_register_data(register_t reg)
 }
 
 
-void handle_mov(instruction_t instr)
+void handle_mov(instruction_t instr, simulator_t *simulator)
 {
-	uint16_t src_value = evaluate_src(instr.src);
-	register_data_t prev_data = get_register_data(instr.dest.value.reg);
-	set_register_data(instr.dest.value.reg, src_value);
+	uint16_t src_value = evaluate_src(instr.src, simulator);
+	register_data_t prev_data = get_register_data(instr.dest.value.reg, simulator);
+	set_register_data(instr.dest.value.reg, src_value, simulator);
 
 	format_reg_before_after(prev_data, src_value);
 }
 
-void handle_sub(instruction_t instr)
+void handle_sub(instruction_t instr, simulator_t *simulator)
 {
-	register_data_t prev_data = get_register_data(instr.dest.value.reg);
-	uint16_t src_value = evaluate_src(instr.src);
+	register_data_t prev_data = get_register_data(instr.dest.value.reg, simulator);
+	uint16_t src_value = evaluate_src(instr.src, simulator);
 	uint16_t result = prev_data.value - src_value;
-	set_register_data(instr.dest.value.reg, result);
+	set_register_data(instr.dest.value.reg, result, simulator);
 
-	process_cpu_flags(result);
+	process_cpu_flags(result, simulator);
 
 	format_reg_before_after(prev_data, result);
 }
 
-void handle_add(instruction_t instr)
+void handle_add(instruction_t instr, simulator_t *simulator)
 {
-	register_data_t prev_data = get_register_data(instr.dest.value.reg);
-	uint16_t src_value = evaluate_src(instr.src);
+	register_data_t prev_data = get_register_data(instr.dest.value.reg, simulator);
+	uint16_t src_value = evaluate_src(instr.src, simulator);
 	uint16_t result = prev_data.value + src_value;
-	set_register_data(instr.dest.value.reg, result);
+	set_register_data(instr.dest.value.reg, result, simulator);
 
-	process_cpu_flags(result);
+	process_cpu_flags(result, simulator);
 
 	format_reg_before_after(prev_data, result);
 }
 
-void handle_cmp(instruction_t instr)
+void handle_cmp(instruction_t instr, simulator_t *simulator)
 {
-	register_data_t prev_data = get_register_data(instr.dest.value.reg);
-	uint16_t src_value = evaluate_src(instr.src);
+	register_data_t prev_data = get_register_data(instr.dest.value.reg, simulator);
+	uint16_t src_value = evaluate_src(instr.src, simulator);
 	uint16_t result = prev_data.value - src_value;
 
-	process_cpu_flags(result);
+	process_cpu_flags(result, simulator);
 }
 
-void process_cpu_flags(uint16_t result){
+void process_cpu_flags(uint16_t result, simulator_t *simulator){
 	if (result == 0)
 	{
-		cpu.flags |= FLAG_ZF;
+		simulator->cpu.flags |= FLAG_ZF;
 	}
 	else
 	{
-		cpu.flags &= ~FLAG_ZF;
+		simulator->cpu.flags &= ~FLAG_ZF;
 	}
 
 	if (result & 0x8000)
 	{
-		cpu.flags |= FLAG_SF;
+		simulator->cpu.flags |= FLAG_SF;
 	}
 	else
 	{
-		cpu.flags &= ~FLAG_SF;
+		simulator->cpu.flags &= ~FLAG_SF;
 	}
-	format_cpu_flags();
+	format_cpu_flags(simulator);
 }
 
-void format_cpu_flags(){
-	printf("flags: 0x%04X (zero: %d, sign: %d)\n", cpu.flags, (cpu.flags & FLAG_ZF) != 0, (cpu.flags & FLAG_SF) != 0);
+void format_cpu_flags(simulator_t *simulator){
+	printf("flags: 0x%04X (zero: %d, sign: %d)\n", simulator->cpu.flags, (simulator->cpu.flags & FLAG_ZF) != 0, (simulator->cpu.flags & FLAG_SF) != 0);
 }
 
 void format_reg_before_after(register_data_t prev_data, uint16_t src_value)
@@ -326,26 +326,27 @@ void format_reg_before_after(register_data_t prev_data, uint16_t src_value)
 	}
 }
 
-void format_cpu_state()
+void format_cpu_state(simulator_t *simulator)
 {
 	printf("Final registers\n");
 #define REGISTER(reg) printf("  %s: 0x%04X (high: 0x%02X, low: 0x%02X) (%d)\n", \
 														 #reg,                                              \
-														 cpu.reg.x,                                         \
-														 cpu.reg.byte.h,                                    \
-														 cpu.reg.byte.l,                                    \
-														 cpu.reg.x);
+														 simulator->cpu.reg.x,                                         \
+														 simulator->cpu.reg.byte.h,                                    \
+														 simulator->cpu.reg.byte.l,                                    \
+														 simulator->cpu.reg.x);
 	GENERAL_REGISTERS
 #undef REGISTER
 
 #define REGISTER(reg) printf("  %s: 0x%04X (%d)\n", \
 														 #reg,                  \
-														 cpu.reg,               \
-														 cpu.reg);
+														 simulator->cpu.reg,               \
+														 simulator->cpu.reg);
 	POINTER_REGISTERS
 #undef REGISTER
 
-	printf("  flags: 0x%04X (zero: %d, sign: %d)\n", cpu.flags, (cpu.flags & FLAG_ZF) != 0, (cpu.flags & FLAG_SF) != 0);
+	printf("  flags: 0x%04X (zero: %d, sign: %d)\n", simulator->cpu.flags, (simulator->cpu.flags & FLAG_ZF) != 0, (simulator->cpu.flags & FLAG_SF) != 0);
+	printf("  instr_ptr: 0x%04X\n", simulator->cpu.instr_ptr);
 }
 
 
@@ -353,6 +354,12 @@ void format_cpu_state()
 
 instruction_t parse_instruction(simulator_t *simulator) {
 	decoder_t *decoder = simulator->decoder;
+
+	// Bounds check
+	if (simulator->cpu.instr_ptr >= simulator->program_size) {
+		return (instruction_t){};
+	}
+
 	uint8_t byte = decoder->bin_buffer[simulator->cpu.instr_ptr];
 	instruction_t instruction = {};
 
@@ -545,7 +552,8 @@ instruction_t mod_regm_reg(simulator_t *simulator, operation_t operation) {
 		}
 		case 0b00: {
 			if (regm == 0b110) {
-				// TODO: Direct address translation exception
+				// Direct address mode: 16-bit displacement only
+				return handle_mod_00_direct_address(instr, simulator);
 			}
 			return handle_mod_00(instr, simulator);
 		}
@@ -585,8 +593,14 @@ instruction_t mov_immed_to_reg(simulator_t *simulator) {
 	uint16_t immed;
 
 	advance_decoder(simulator);
+	if (simulator->cpu.instr_ptr >= simulator->program_size) {
+		return (instruction_t){};
+	}
 	byte = decoder->bin_buffer[simulator->cpu.instr_ptr];
 	if (w_bit == 1) {
+		if (simulator->cpu.instr_ptr + 1 >= simulator->program_size) {
+			return (instruction_t){};
+		}
 		immed = (decoder->bin_buffer[simulator->cpu.instr_ptr + 1] << 8) | byte;
 		advance_decoder(simulator);
 	} else {
@@ -772,6 +786,32 @@ instruction_t handle_mod_00(instruction_data_t instr, simulator_t *simulator) {
 	return create_instruction(instr.operation, dest, src, instr.w_bit);
 }
 
+instruction_t handle_mod_00_direct_address(instruction_data_t instr, simulator_t *simulator) {
+	decoder_t *decoder = simulator->decoder;
+	advance_decoder(simulator);
+
+	// Read 16-bit direct address
+	if (simulator->cpu.instr_ptr + 1 >= simulator->program_size) {
+		return (instruction_t){};
+	}
+
+	uint8_t addr_lo = decoder->bin_buffer[simulator->cpu.instr_ptr];
+	advance_decoder(simulator);
+	uint8_t addr_hi = decoder->bin_buffer[simulator->cpu.instr_ptr];
+	uint16_t direct_addr = (addr_hi << 8) | addr_lo;
+
+	operand_t dest;
+	operand_t src;
+	if (instr.d_s_bit) {
+		dest = create_register_operand_from_bits(instr.reg, instr.w_bit);
+		src = create_memory_operand(REG_NONE, REG_NONE, direct_addr);
+	} else {
+		dest = create_memory_operand(REG_NONE, REG_NONE, direct_addr);
+		src = create_register_operand_from_bits(instr.reg, instr.w_bit);
+	}
+	return create_instruction(instr.operation, dest, src, instr.w_bit);
+}
+
 instruction_t handle_mod_01(instruction_data_t instr, simulator_t *simulator) {
 	decoder_t *decoder = simulator->decoder;
 	advance_decoder(simulator);
@@ -898,27 +938,57 @@ instruction_t handle_mod_10_immed(instruction_data_t instr,
 
 void advance_decoder(simulator_t *simulator) {
 	simulator->cpu.instr_ptr++;
+	if (simulator->cpu.instr_ptr >= simulator->program_size) {
+		// Prevent reading beyond program buffer
+		simulator->cpu.instr_ptr = simulator->program_size - 1;
+	}
 }
 
 byte_t *read_binary_file(const char *file_path, size_t *bin_size) {
 	FILE *file = fopen(file_path, "rb");
 	if (!file) {
+		fprintf(stderr, "Error: Could not open file '%s'\n", file_path);
 		return NULL;
 	}
-	// Get the size of the file - may be inefficient as files get larger
-	fseek(file, 0, SEEK_END);
-	*bin_size = ftell(file);
-	fseek(file, 0, SEEK_SET);
 
-	byte_t *bin_buffer = malloc(*bin_size);
-	if (!bin_buffer) {
+	// Get the size of the file - may be inefficient as files get larger
+	if (fseek(file, 0, SEEK_END) != 0) {
+		fprintf(stderr, "Error: Could not seek to end of file '%s'\n", file_path);
 		fclose(file);
 		return NULL;
 	}
 
-	fread(bin_buffer, sizeof(byte_t), *bin_size, file);
-	fclose(file);
+	long file_size = ftell(file);
+	if (file_size < 0) {
+		fprintf(stderr, "Error: Could not determine size of file '%s'\n", file_path);
+		fclose(file);
+		return NULL;
+	}
 
+	*bin_size = (size_t)file_size;
+
+	if (fseek(file, 0, SEEK_SET) != 0) {
+		fprintf(stderr, "Error: Could not seek to beginning of file '%s'\n", file_path);
+		fclose(file);
+		return NULL;
+	}
+
+	byte_t *bin_buffer = malloc(*bin_size);
+	if (!bin_buffer) {
+		fprintf(stderr, "Error: Could not allocate memory for file '%s' (size: %zu bytes)\n", file_path, *bin_size);
+		fclose(file);
+		return NULL;
+	}
+
+	size_t bytes_read = fread(bin_buffer, sizeof(byte_t), *bin_size, file);
+	if (bytes_read != *bin_size) {
+		fprintf(stderr, "Error: Could not read complete file '%s' (read %zu of %zu bytes)\n", file_path, bytes_read, *bin_size);
+		free(bin_buffer);
+		fclose(file);
+		return NULL;
+	}
+
+	fclose(file);
 	return bin_buffer;
 }
 
@@ -1039,11 +1109,17 @@ void print_encoding_to_int(char *encoding) {
 
 int slice_current_bits(simulator_t *simulator, int start, int end) {
 	decoder_t *decoder = simulator->decoder;
+	if (simulator->cpu.instr_ptr >= simulator->program_size) {
+		return 0;
+	}
 	return get_bits(decoder->bin_buffer[simulator->cpu.instr_ptr], start, end);
 }
 
 int slice_peek_bits(simulator_t *simulator, int start, int end) {
 	decoder_t *decoder = simulator->decoder;
+	if (simulator->cpu.instr_ptr + 1 >= simulator->program_size) {
+		return 0;
+	}
 	return get_bits(decoder->bin_buffer[simulator->cpu.instr_ptr + 1], start, end);
 }
 

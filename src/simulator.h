@@ -12,9 +12,7 @@
 typedef uint8_t byte_t;
 
 typedef struct Decoder {
-	size_t pos;
 	const byte_t *bin_buffer;
-	char output_buf[BUFSIZ];
 } decoder_t;
 
 typedef enum Register {
@@ -160,7 +158,7 @@ typedef struct {
   size_t program_size;
 } simulator_t;
 
-static cpu_state_t cpu;
+
 
 void run_simulation(simulator_t *simulator);
 
@@ -173,6 +171,7 @@ instruction_t immed_to_acc(simulator_t *simulator, operation_t operation);
 
 instruction_t handle_mod_11(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_00(instruction_data_t instr, simulator_t *simulator);
+instruction_t handle_mod_00_direct_address(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_01(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_10(instruction_data_t instr, simulator_t *simulator);
 
@@ -199,32 +198,18 @@ int get_bits(int num, int start, int end);
 cpu_reg_t bits_to_reg(int reg, int is_16_bit);
 
 // Simulator functions
-void eval_instruction(instruction_t instr);
-void process_cpu_flags(uint16_t result);
-void format_cpu_state();
-void format_cpu_flags();
-void handle_mov(instruction_t instr);
-void handle_add(instruction_t instr);
-void handle_sub(instruction_t instr);
-void handle_cmp(instruction_t instr);
+void eval_instruction(instruction_t instr, simulator_t *simulator);
+void process_cpu_flags(uint16_t result, simulator_t *simulator);
+void format_cpu_state(simulator_t *simulator);
+void format_cpu_flags(simulator_t *simulator);
+void handle_mov(instruction_t instr, simulator_t *simulator);
+void handle_add(instruction_t instr, simulator_t *simulator);
+void handle_sub(instruction_t instr, simulator_t *simulator);
+void handle_cmp(instruction_t instr, simulator_t *simulator);
 
-uint16_t evaluate_src(operand_t src);
-register_data_t get_register_data(register_t reg);
-void set_register_data(register_t reg, uint16_t src_value);
-void format_reg_before_after(register_data_t prev_data, uint16_t src_value);
-
-void eval_instruction(instruction_t instr);
-void process_cpu_flags(uint16_t result);
-void format_cpu_state();
-void format_cpu_flags();
-void handle_mov(instruction_t instr);
-void handle_add(instruction_t instr);
-void handle_sub(instruction_t instr);
-void handle_cmp(instruction_t instr);
-
-uint16_t evaluate_src(operand_t src);
-register_data_t get_register_data(register_t reg);
-void set_register_data(register_t reg, uint16_t src_value);
+uint16_t evaluate_src(operand_t src, simulator_t *simulator);
+register_data_t get_register_data(register_t reg, simulator_t *simulator);
+void set_register_data(register_t reg, uint16_t src_value, simulator_t *simulator);
 void format_reg_before_after(register_data_t prev_data, uint16_t src_value);
 
 #endif

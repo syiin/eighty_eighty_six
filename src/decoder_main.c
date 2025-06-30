@@ -19,7 +19,6 @@ int main(int argc, char *argv[]) {
     }
 
     decoder_t decoder = {
-        .pos = 0,
         .bin_buffer = bin_buffer,
     };
 
