@@ -92,6 +92,17 @@ void eval_instruction(instruction_t instr, simulator_t *simulator)
 			handle_cmp(instr, simulator);
 			break;
 		};
+		case OP_JMP:
+		{
+			handle_jmp(instr, simulator);
+			break;
+		};
+		case OP_JNZ:
+		case OP_JNE:
+		{
+			handle_jnz(instr, simulator);
+			break;
+		};
 		default:
 		{
 			break;
@@ -281,6 +292,20 @@ void handle_cmp(instruction_t instr, simulator_t *simulator)
 	uint16_t result = prev_data.value - src_value;
 
 	process_cpu_flags(result, simulator);
+}
+
+void handle_jmp(instruction_t instr, simulator_t *simulator)
+{
+	simulator->cpu.instr_ptr = instr.dest.value.immediate;
+}
+
+void handle_jnz(instruction_t instr, simulator_t *simulator)
+{
+	if (simulator->cpu.flags & FLAG_ZF)
+	{
+		return;
+	}
+	simulator->cpu.instr_ptr = simulator->cpu.instr_ptr + instr.dest.value.immediate;
 }
 
 void process_cpu_flags(uint16_t result, simulator_t *simulator){

@@ -206,6 +206,8 @@ void handle_mov(instruction_t instr, simulator_t *simulator);
 void handle_add(instruction_t instr, simulator_t *simulator);
 void handle_sub(instruction_t instr, simulator_t *simulator);
 void handle_cmp(instruction_t instr, simulator_t *simulator);
+void handle_jmp(instruction_t instr, simulator_t *simulator);
+void handle_jnz(instruction_t instr, simulator_t *simulator);
 
 uint16_t evaluate_src(operand_t src, simulator_t *simulator);
 register_data_t get_register_data(register_t reg, simulator_t *simulator);
