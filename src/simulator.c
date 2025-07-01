@@ -63,6 +63,24 @@ uint16_t evaluate_src(operand_t src, simulator_t *simulator)
 			return 0;
 		}
 	}
+	case OPERAND_MEMORY:
+	{
+		memory_address_t mem = src.value.memory;
+		uint16_t address = 0;
+		if (mem.has_base)
+		{
+			address += get_register_data(mem.base_reg, simulator).value;
+		}
+		if (mem.has_index)
+		{
+			address += get_register_data(mem.index_reg, simulator).value;
+		}
+		if (mem.has_displacement)
+		{
+			address += mem.displacement;
+		}
+		return simulator->memory[address];
+	}
 	default:
 		return 0;
 	}

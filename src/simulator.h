@@ -155,10 +155,9 @@ typedef struct {
 typedef struct {
   cpu_state_t cpu;
   decoder_t *decoder;
+  int16_t memory[65536];
   size_t program_size;
 } simulator_t;
-
-
 
 void run_simulation(simulator_t *simulator);
 
