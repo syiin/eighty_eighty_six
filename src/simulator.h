@@ -167,10 +167,12 @@ instruction_t mod_regm_reg(simulator_t *simulator, operation_t operation);
 instruction_t mov_immed_to_reg(simulator_t *simulator);
 instruction_t immed_to_regm(simulator_t *simulator);
 instruction_t immed_to_acc(simulator_t *simulator, operation_t operation);
+instruction_t mov_immed_to_mem(simulator_t *simulator);
 
 instruction_t handle_mod_11(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_00(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_00_direct_address(instruction_data_t instr, simulator_t *simulator);
+instruction_t handle_mod_00_immed_direct_address(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_01(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_10(instruction_data_t instr, simulator_t *simulator);
 

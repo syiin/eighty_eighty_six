@@ -1,5 +1,6 @@
 #include "simulator.h"
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/types.h>
 
 // SIMULATOR
@@ -432,6 +433,10 @@ instruction_t parse_instruction(simulator_t *simulator) {
 			instruction = mod_regm_reg(simulator, OP_CMP);
 			break;
 		}
+		case 0b110001: {
+			instruction = mov_immed_to_mem(simulator);
+			break;
+		}
 	}
 
 	switch (byte >> 1) {
@@ -691,6 +696,7 @@ instruction_t immed_to_regm(simulator_t *simulator) {
 		.w_bit = w_bit,
 		.reg = op_octet,
 		.regm = regm};
+
 	switch (mod) {
 		case 0b11: {
 			return handle_mod_11_immed(instr, simulator);
@@ -701,6 +707,44 @@ instruction_t immed_to_regm(simulator_t *simulator) {
 		case 0b10: {
 			return handle_mod_10_immed(instr, simulator);
 		}
+	}
+	return (instruction_t){};
+}
+
+instruction_t mov_immed_to_mem(simulator_t *simulator) {
+	decoder_t *decoder = simulator->decoder;
+	uint8_t byte = decoder->bin_buffer[simulator->cpu.instr_ptr];
+	uint8_t w_bit = (byte >> 1) & 0b1;
+	advance_decoder(simulator);
+
+	byte = decoder->bin_buffer[simulator->cpu.instr_ptr];
+	uint8_t mod = byte >> 6;
+	uint8_t reg = (byte >> 3) & 0b111;
+	uint8_t regm = byte & 0b111;
+
+	instruction_data_t instr = {.operation = OP_MOV,
+		.d_s_bit = 1,
+		.w_bit = w_bit,
+		.reg = reg,
+		.regm = regm};
+
+	switch (mod) {
+		case 0b11: {
+			return handle_mod_11_immed(instr, simulator);
+		}
+		case 0b00: {
+			if (regm == 0b110) {
+				// Direct address mode: 16-bit displacement only
+				return handle_mod_00_immed_direct_address(instr, simulator);
+			}
+			return handle_mod_00_immed(instr, simulator);
+		}
+		case 0b10: {
+			return handle_mod_10_immed(instr, simulator);
+		}
+		// case 0b01: {
+		// 	return handle_mod_01_immed(instr, simulator);
+		// }
 	}
 	return (instruction_t){};
 }
@@ -834,10 +878,6 @@ instruction_t handle_mod_00_direct_address(instruction_data_t instr, simulator_t
 	advance_decoder(simulator);
 
 	// Read 16-bit direct address
-	if (simulator->cpu.instr_ptr + 1 >= simulator->program_size) {
-		return (instruction_t){};
-	}
-
 	uint8_t addr_lo = decoder->bin_buffer[simulator->cpu.instr_ptr];
 	advance_decoder(simulator);
 	uint8_t addr_hi = decoder->bin_buffer[simulator->cpu.instr_ptr];
@@ -853,6 +893,29 @@ instruction_t handle_mod_00_direct_address(instruction_data_t instr, simulator_t
 		src = create_register_operand_from_bits(instr.reg, instr.w_bit);
 	}
 	return create_instruction(instr.operation, dest, src, instr.w_bit);
+}
+
+instruction_t handle_mod_00_immed_direct_address(instruction_data_t instr, simulator_t *simulator) {
+	decoder_t *decoder = simulator->decoder;
+	advance_decoder(simulator);
+	uint8_t addr_lo = decoder->bin_buffer[simulator->cpu.instr_ptr];
+	advance_decoder(simulator);
+	uint8_t addr_hi = decoder->bin_buffer[simulator->cpu.instr_ptr];
+	uint16_t direct_addr = (addr_hi << 8) | addr_lo;
+
+	advance_decoder(simulator);
+	// Read immediate data
+	uint8_t data = decoder->bin_buffer[simulator->cpu.instr_ptr];
+	if (instr.w_bit == 1) {
+		advance_decoder(simulator);
+		uint8_t data_hi = decoder->bin_buffer[simulator->cpu.instr_ptr];
+		data = (data_hi << 8) | data;
+	}
+
+	operand_t dest = create_memory_operand(REG_NONE, REG_NONE, direct_addr);
+	operand_t src = create_immediate_operand(data);
+	return create_instruction(instr.operation, dest, src, instr.w_bit);
+	
 }
 
 instruction_t handle_mod_01(instruction_data_t instr, simulator_t *simulator) {
@@ -980,6 +1043,7 @@ instruction_t handle_mod_10_immed(instruction_data_t instr,
 }
 
 void advance_decoder(simulator_t *simulator) {
+	// print_position(simulator->decoder->bin_buffer, simulator->cpu.instr_ptr);
 	simulator->cpu.instr_ptr++;
 }
 
@@ -1085,7 +1149,6 @@ void format_instruction(const instruction_t *instr) {
     // Format operands
     format_operand(dest_buf, sizeof(dest_buf), &instr->dest);
     format_operand(src_buf, sizeof(src_buf), &instr->src);
-
     // Handle jump instructions (single operand)
     if (instr->op == OP_JMP || instr->op == OP_JE || instr->op == OP_JNE ||
         instr->op == OP_JL || instr->op == OP_JLE || instr->op == OP_JG ||
