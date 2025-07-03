@@ -153,9 +153,14 @@ typedef struct {
 } register_data_t;
 
 typedef struct {
+	int16_t data[65536];
+	int16_t last_used;
+} memory_data_t;
+
+typedef struct {
   cpu_state_t cpu;
   decoder_t *decoder;
-  int16_t memory[65536];
+  memory_data_t memory;
   size_t program_size;
 } simulator_t;
 
@@ -203,6 +208,7 @@ cpu_reg_t bits_to_reg(int reg, int is_16_bit);
 void eval_instruction(instruction_t instr, simulator_t *simulator);
 void process_cpu_flags(uint16_t result, simulator_t *simulator);
 void format_cpu_state(simulator_t *simulator);
+void format_memory_state(simulator_t *simulator);
 void format_cpu_flags(simulator_t *simulator);
 void handle_mov(instruction_t instr, simulator_t *simulator);
 void handle_add(instruction_t instr, simulator_t *simulator);

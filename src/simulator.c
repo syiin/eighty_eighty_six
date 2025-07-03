@@ -16,6 +16,7 @@ void run_simulation(simulator_t *simulator)
 		eval_instruction(instruction, simulator);
 	}
 	format_cpu_state(simulator);
+	format_memory_state(simulator);
 }
 
 uint16_t evaluate_src(operand_t src, simulator_t *simulator)
@@ -80,7 +81,7 @@ uint16_t evaluate_src(operand_t src, simulator_t *simulator)
 		{
 			address += mem.displacement;
 		}
-		return simulator->memory[address];
+		return simulator->memory.data[address];
 	}
 	default:
 		return 0;
@@ -184,6 +185,15 @@ void set_register_data(register_t reg, uint16_t src_value, simulator_t *simulato
 	}
 }
 
+void set_memory_data(uint16_t address, uint16_t src_value, simulator_t *simulator)
+{
+	simulator->memory.data[address] = src_value;
+	if (simulator->memory.last_used < address)
+	{
+		simulator->memory.last_used = address;
+	}
+}
+
 register_data_t get_register_data(register_t reg, simulator_t *simulator)
 {
 	register_data_t info = {
@@ -270,14 +280,39 @@ register_data_t get_register_data(register_t reg, simulator_t *simulator)
 	return info;
 }
 
-
 void handle_mov(instruction_t instr, simulator_t *simulator)
 {
 	uint16_t src_value = evaluate_src(instr.src, simulator);
-	register_data_t prev_data = get_register_data(instr.dest.value.reg, simulator);
-	set_register_data(instr.dest.value.reg, src_value, simulator);
-
-	format_reg_before_after(prev_data, src_value);
+	register_data_t prev_data;
+	switch(instr.dest.type){
+		case OPERAND_REGISTER:
+			prev_data = get_register_data(instr.dest.value.reg, simulator);
+			set_register_data(instr.dest.value.reg, src_value, simulator);
+			format_reg_before_after(prev_data, src_value);
+			break;
+		case OPERAND_MEMORY:
+		{
+			memory_address_t mem = instr.dest.value.memory;
+			uint16_t address = 0;
+			if (mem.has_base)
+			{
+				address += get_register_data(mem.base_reg, simulator).value;
+			}
+			if (mem.has_index)
+			{
+				address += get_register_data(mem.index_reg, simulator).value;
+			}
+			if (mem.has_displacement)
+			{
+				address += mem.displacement;
+			}
+			set_memory_data(address, src_value, simulator);
+			break;
+		}
+		default:
+			printf("UNHANDLED MOV INSTRUCTION\n");
+			break;
+	}
 }
 
 void handle_sub(instruction_t instr, simulator_t *simulator)
@@ -393,6 +428,17 @@ void format_cpu_state(simulator_t *simulator)
 	printf("  instr_ptr: 0x%04X\n", simulator->cpu.instr_ptr);
 }
 
+void format_memory_state(simulator_t *simulator)
+{
+	printf("Memory state\n");
+	for (int i = 0; i < simulator->memory.last_used; i++)
+	{
+		if (simulator->memory.data[i] != 0)
+		{
+			printf("  0x%04X (%d): 0x%04X (%d)\n", i, i, simulator->memory.data[i], simulator->memory.data[i]);
+		}
+	}
+}
 
 // DECODER
 
@@ -852,7 +898,6 @@ operand_t create_memory_operand_from_bits(int regm, uint16_t disp) {
 
 	return create_memory_operand(base, index, disp);
 }
-
 
 instruction_t handle_mod_11(instruction_data_t instr, simulator_t *simulator) {
 	operand_t dest = create_register_operand_from_bits(instr.regm, instr.w_bit);
