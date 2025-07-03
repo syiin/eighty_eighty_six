@@ -742,9 +742,9 @@ instruction_t mov_immed_to_mem(simulator_t *simulator) {
 		case 0b10: {
 			return handle_mod_10_immed(instr, simulator);
 		}
-		// case 0b01: {
-		// 	return handle_mod_01_immed(instr, simulator);
-		// }
+		case 0b01: {
+			return handle_mod_01_immed(instr, simulator);
+		}
 	}
 	return (instruction_t){};
 }
@@ -933,6 +933,25 @@ instruction_t handle_mod_01(instruction_data_t instr, simulator_t *simulator) {
 		src = create_register_operand_from_bits(instr.reg, instr.w_bit);
 	}
 
+	return create_instruction(instr.operation, dest, src, instr.w_bit);
+}
+
+instruction_t handle_mod_01_immed(instruction_data_t instr, simulator_t *simulator) {
+	decoder_t *decoder = simulator->decoder;
+	advance_decoder(simulator);
+	uint8_t byte = decoder->bin_buffer[simulator->cpu.instr_ptr];
+
+	advance_decoder(simulator);
+	// Read immediate data
+	uint8_t data = decoder->bin_buffer[simulator->cpu.instr_ptr];
+	if (instr.w_bit == 1) {
+		advance_decoder(simulator);
+		uint8_t data_hi = decoder->bin_buffer[simulator->cpu.instr_ptr];
+		data = (data_hi << 8) | data;
+	}
+
+	operand_t dest = create_memory_operand_from_bits(instr.regm, byte);
+	operand_t src = create_immediate_operand(data);
 	return create_instruction(instr.operation, dest, src, instr.w_bit);
 }
 

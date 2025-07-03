@@ -174,6 +174,7 @@ instruction_t handle_mod_00(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_00_direct_address(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_00_immed_direct_address(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_01(instruction_data_t instr, simulator_t *simulator);
+instruction_t handle_mod_01_immed(instruction_data_t instr, simulator_t *simulator);
 instruction_t handle_mod_10(instruction_data_t instr, simulator_t *simulator);
 
 instruction_t handle_mod_11_immed(instruction_data_t instr, simulator_t *simulator);
