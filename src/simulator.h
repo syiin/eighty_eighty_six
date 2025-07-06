@@ -165,6 +165,7 @@ typedef struct {
 } simulator_t;
 
 void run_simulation(simulator_t *simulator);
+void run_simulation_to_file(simulator_t *simulator, FILE *output_file);
 
 // Decoder function declarations
 instruction_t parse_instruction(simulator_t *simulator);
@@ -210,6 +211,10 @@ void process_cpu_flags(uint16_t result, simulator_t *simulator);
 void format_cpu_state(simulator_t *simulator);
 void format_memory_state(simulator_t *simulator);
 void format_cpu_flags(simulator_t *simulator);
+void format_cpu_state_to_file(simulator_t *simulator, FILE *output_file);
+void format_memory_state_to_file(simulator_t *simulator, FILE *output_file);
+void format_instruction_to_file(const instruction_t *instr, FILE *output_file);
+void format_reg_before_after_to_file(register_data_t prev_data, uint16_t src_value, FILE *output_file);
 void handle_mov(instruction_t instr, simulator_t *simulator);
 void handle_add(instruction_t instr, simulator_t *simulator);
 void handle_sub(instruction_t instr, simulator_t *simulator);

@@ -1,0 +1,43 @@
+mov ax, [bx+di+219]
+mov [si-300], cx
+mov dx, [bx+224]
+mov byte [bp+di], 7
+mov word [di+901], 347
+mov , 
+UNHANDLED MOV INSTRUCTION
+add ax, -29952
+flags: 0x0080 (zero: 0, sign: 1)
+AX: 0x0000 -> 0x8B00 (35584)
+mov , 
+UNHANDLED MOV INSTRUCTION
+add byte [di], 161
+flags: 0x0000 (zero: 0, sign: 0)
+UNKNOWN: 0x0000 -> 0x00A1 (161)
+mov , 
+UNHANDLED MOV INSTRUCTION
+mov , 
+UNHANDLED MOV INSTRUCTION
+mov , 
+UNHANDLED MOV INSTRUCTION
+mov , 
+UNHANDLED MOV INSTRUCTION
+add [bp+di+2554], ah
+flags: 0x0000 (zero: 0, sign: 0)
+BP: 0x0000 -> 0x008B (139)
+mov , 
+UNHANDLED MOV INSTRUCTION
+mov , 
+UNHANDLED MOV INSTRUCTION
+Final registers
+  ax: 0x8B00 (high: 0x8B, low: 0x00) (35584)
+  bx: 0x0000 (high: 0x00, low: 0x00) (0)
+  cx: 0x0000 (high: 0x00, low: 0x00) (0)
+  dx: 0x0000 (high: 0x00, low: 0x00) (0)
+  sp: 0x0000 (0)
+  bp: 0x008B (139)
+  si: 0x0000 (0)
+  di: 0x0000 (0)
+  flags: 0x0000 (zero: 0, sign: 0)
+  instr_ptr: 0x0026
+Memory state
+  0x0000 (0): 0x0007 (7)

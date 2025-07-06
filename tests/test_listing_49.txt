@@ -1,0 +1,37 @@
+mov cx, 3
+CX: 0x0000 -> 0x0003 (3)
+mov bx, 1000
+BX: 0x0000 -> 0x03E8 (1000)
+add bx, 10
+flags: 0x0000 (zero: 0, sign: 0)
+BX: 0x03E8 -> 0x03F2 (1010)
+sub cx, 1
+flags: 0x0000 (zero: 0, sign: 0)
+CX: 0x0003 -> 0x0002 (2)
+jnz -8, 
+add bx, 10
+flags: 0x0000 (zero: 0, sign: 0)
+BX: 0x03F2 -> 0x03FC (1020)
+sub cx, 1
+flags: 0x0000 (zero: 0, sign: 0)
+CX: 0x0002 -> 0x0001 (1)
+jnz -8, 
+add bx, 10
+flags: 0x0000 (zero: 0, sign: 0)
+BX: 0x03FC -> 0x0406 (1030)
+sub cx, 1
+flags: 0x0040 (zero: 1, sign: 0)
+CX: 0x0001 -> 0x0000 (0)
+jnz -8, 
+Final registers
+  ax: 0x0000 (high: 0x00, low: 0x00) (0)
+  bx: 0x0406 (high: 0x04, low: 0x06) (1030)
+  cx: 0x0000 (high: 0x00, low: 0x00) (0)
+  dx: 0x0000 (high: 0x00, low: 0x00) (0)
+  sp: 0x0000 (0)
+  bp: 0x0000 (0)
+  si: 0x0000 (0)
+  di: 0x0000 (0)
+  flags: 0x0040 (zero: 1, sign: 0)
+  instr_ptr: 0x000E
+Memory state

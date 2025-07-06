@@ -1,0 +1,24 @@
+mov cx, 200
+CX: 0x0000 -> 0x00C8 (200)
+mov bx, cx
+BX: 0x0000 -> 0x00C8 (200)
+add cx, 1000
+flags: 0x0000 (zero: 0, sign: 0)
+CX: 0x00C8 -> 0x04B0 (1200)
+mov bx, 2000
+BX: 0x00C8 -> 0x07D0 (2000)
+sub cx, bx
+flags: 0x0080 (zero: 0, sign: 1)
+CX: 0x04B0 -> 0xFCE0 (64736)
+Final registers
+  ax: 0x0000 (high: 0x00, low: 0x00) (0)
+  bx: 0x07D0 (high: 0x07, low: 0xD0) (2000)
+  cx: 0xFCE0 (high: 0xFC, low: 0xE0) (64736)
+  dx: 0x0000 (high: 0x00, low: 0x00) (0)
+  sp: 0x0000 (0)
+  bp: 0x0000 (0)
+  si: 0x0000 (0)
+  di: 0x0000 (0)
+  flags: 0x0080 (zero: 0, sign: 1)
+  instr_ptr: 0x000E
+Memory state

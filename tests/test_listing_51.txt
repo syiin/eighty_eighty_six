@@ -1,0 +1,30 @@
+mov word [1000], 1
+mov word [1002], 2
+mov word [1004], 3
+mov word [1006], 4
+mov bx, 1000
+BX: 0x0000 -> 0x03E8 (1000)
+mov word [bx+4], 10
+mov bx, [1000]
+BX: 0x03E8 -> 0x0001 (1)
+mov cx, [1002]
+CX: 0x0000 -> 0x0002 (2)
+mov dx, [1004]
+DX: 0x0000 -> 0x000A (10)
+mov bp, [1006]
+BP: 0x0000 -> 0x0004 (4)
+Final registers
+  ax: 0x0000 (high: 0x00, low: 0x00) (0)
+  bx: 0x0001 (high: 0x00, low: 0x01) (1)
+  cx: 0x0002 (high: 0x00, low: 0x02) (2)
+  dx: 0x000A (high: 0x00, low: 0x0A) (10)
+  sp: 0x0000 (0)
+  bp: 0x0004 (4)
+  si: 0x0000 (0)
+  di: 0x0000 (0)
+  flags: 0x0000 (zero: 0, sign: 0)
+  instr_ptr: 0x0030
+Memory state
+  0x03E8 (1000): 0x0001 (1)
+  0x03EA (1002): 0x0002 (2)
+  0x03EC (1004): 0x000A (10)
