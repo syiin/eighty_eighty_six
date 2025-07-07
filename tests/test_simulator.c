@@ -129,11 +129,13 @@ int main() {
     // List of test cases (excluding listing_54 as requested)
     const char *test_cases[] = {
         "listing_37",
-        "listing_38", 
+        "listing_38",
         "listing_39",
         "listing_40",
         "listing_41",
         "listing_43",
+        "listing_44",
+        "listing_46",
         "listing_48",
         "listing_49",
         "listing_51",
