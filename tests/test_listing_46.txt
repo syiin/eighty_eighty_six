@@ -1,0 +1,31 @@
+mov bx, -4093
+BX: 0x0000 -> 0xF003 (61443)
+mov cx, 3841
+CX: 0x0000 -> 0x0F01 (3841)
+sub bx, cx
+flags: 0x0080 (zero: 0, sign: 1)
+BX: 0xF003 -> 0xE102 (57602)
+mov sp, 998
+SP: 0x0000 -> 0x03E6 (998)
+mov bp, 999
+BP: 0x0000 -> 0x03E7 (999)
+cmp bp, sp
+flags: 0x0000 (zero: 0, sign: 0)
+add bp, 1027
+flags: 0x0000 (zero: 0, sign: 0)
+BP: 0x03E7 -> 0x07EA (2026)
+sub bp, 2026
+flags: 0x0040 (zero: 1, sign: 0)
+BP: 0x07EA -> 0x0000 (0)
+Final registers
+  ax: 0x0000 (high: 0x00, low: 0x00) (0)
+  bx: 0xE102 (high: 0xE1, low: 0x02) (57602)
+  cx: 0x0F01 (high: 0x0F, low: 0x01) (3841)
+  dx: 0x0000 (high: 0x00, low: 0x00) (0)
+  sp: 0x03E6 (998)
+  bp: 0x0000 (0)
+  si: 0x0000 (0)
+  di: 0x0000 (0)
+  flags: 0x0040 (zero: 1, sign: 0)
+  instr_ptr: 0x0018
+Memory state

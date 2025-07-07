@@ -1,0 +1,73 @@
+mov dx, 6
+DX: 0x0000 -> 0x0006 (6)
+mov bp, 1000
+BP: 0x0000 -> 0x03E8 (1000)
+mov si, 0
+mov [bp+si], si
+add si, 2
+flags: 0x0000 (zero: 0, sign: 0)
+SI: 0x0000 -> 0x0002 (2)
+cmp si, dx
+flags: 0x0080 (zero: 0, sign: 1)
+jnz -9, 
+mov [bp+si], si
+add si, 2
+flags: 0x0000 (zero: 0, sign: 0)
+SI: 0x0002 -> 0x0004 (4)
+cmp si, dx
+flags: 0x0080 (zero: 0, sign: 1)
+jnz -9, 
+mov [bp+si], si
+add si, 2
+flags: 0x0000 (zero: 0, sign: 0)
+SI: 0x0004 -> 0x0006 (6)
+cmp si, dx
+flags: 0x0040 (zero: 1, sign: 0)
+jnz -9, 
+mov bx, 0
+mov si, 0
+SI: 0x0006 -> 0x0000 (0)
+mov cx, [bp+si]
+add bx, cx
+flags: 0x0040 (zero: 1, sign: 0)
+add si, 2
+flags: 0x0000 (zero: 0, sign: 0)
+SI: 0x0000 -> 0x0002 (2)
+cmp si, dx
+flags: 0x0080 (zero: 0, sign: 1)
+jnz -11, 
+mov cx, [bp+si]
+CX: 0x0000 -> 0x0002 (2)
+add bx, cx
+flags: 0x0000 (zero: 0, sign: 0)
+BX: 0x0000 -> 0x0002 (2)
+add si, 2
+flags: 0x0000 (zero: 0, sign: 0)
+SI: 0x0002 -> 0x0004 (4)
+cmp si, dx
+flags: 0x0080 (zero: 0, sign: 1)
+jnz -11, 
+mov cx, [bp+si]
+CX: 0x0002 -> 0x0004 (4)
+add bx, cx
+flags: 0x0000 (zero: 0, sign: 0)
+BX: 0x0002 -> 0x0006 (6)
+add si, 2
+flags: 0x0000 (zero: 0, sign: 0)
+SI: 0x0004 -> 0x0006 (6)
+cmp si, dx
+flags: 0x0040 (zero: 1, sign: 0)
+jnz -11, 
+Final registers
+  ax: 0x0000 (high: 0x00, low: 0x00) (0)
+  bx: 0x0006 (high: 0x00, low: 0x06) (6)
+  cx: 0x0004 (high: 0x00, low: 0x04) (4)
+  dx: 0x0006 (high: 0x00, low: 0x06) (6)
+  sp: 0x0000 (0)
+  bp: 0x03E8 (1000)
+  si: 0x0006 (6)
+  di: 0x0000 (0)
+  flags: 0x0040 (zero: 1, sign: 0)
+  instr_ptr: 0x0023
+Memory state
+  0x03EA (1002): 0x0002 (2)

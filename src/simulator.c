@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 
+// Global file pointer for output redirection
+static FILE *g_output_file = NULL;
+
 // SIMULATOR
 
 void run_simulation(simulator_t *simulator)
@@ -17,6 +20,22 @@ void run_simulation(simulator_t *simulator)
 	}
 	format_cpu_state(simulator);
 	format_memory_state(simulator);
+}
+
+void run_simulation_to_file(simulator_t *simulator, FILE *output_file)
+{
+	g_output_file = output_file;
+	while (simulator->cpu.instr_ptr < simulator->program_size - 1)
+	{
+		instruction_t instruction = parse_instruction(simulator);
+		format_instruction_to_file(&instruction, output_file);
+		fprintf(output_file, "\n");
+
+		eval_instruction(instruction, simulator);
+	}
+	format_cpu_state_to_file(simulator, output_file);
+	format_memory_state_to_file(simulator, output_file);
+	g_output_file = NULL;
 }
 
 uint16_t evaluate_src(operand_t src, simulator_t *simulator)
@@ -393,14 +412,40 @@ void format_reg_before_after(register_data_t prev_data, uint16_t src_value)
 	{
 		if (prev_data.value != (src_value & 0xFF))
 		{
-			printf("%s: 0x%02X -> 0x%02X (%d)\n", prev_data.name, prev_data.value, src_value & 0xFF, src_value);
+			if (g_output_file) {
+				fprintf(g_output_file, "%s: 0x%02X -> 0x%02X (%d)\n", prev_data.name, prev_data.value, src_value & 0xFF, src_value);
+			} else {
+				printf("%s: 0x%02X -> 0x%02X (%d)\n", prev_data.name, prev_data.value, src_value & 0xFF, src_value);
+			}
 		}
 	}
 	else
 	{
 		if (prev_data.value != (src_value))
 		{
-			printf("%s: 0x%04X -> 0x%04X (%d)\n", prev_data.name, prev_data.value, src_value, src_value);
+			if (g_output_file) {
+				fprintf(g_output_file, "%s: 0x%04X -> 0x%04X (%d)\n", prev_data.name, prev_data.value, src_value, src_value);
+			} else {
+				printf("%s: 0x%04X -> 0x%04X (%d)\n", prev_data.name, prev_data.value, src_value, src_value);
+			}
+		}
+	}
+}
+
+void format_reg_before_after_to_file(register_data_t prev_data, uint16_t src_value, FILE *output_file)
+{
+	if (prev_data.is_8bit)
+	{
+		if (prev_data.value != (src_value & 0xFF))
+		{
+			fprintf(output_file, "%s: 0x%02X -> 0x%02X (%d)\n", prev_data.name, prev_data.value, src_value & 0xFF, src_value);
+		}
+	}
+	else
+	{
+		if (prev_data.value != (src_value))
+		{
+			fprintf(output_file, "%s: 0x%04X -> 0x%04X (%d)\n", prev_data.name, prev_data.value, src_value, src_value);
 		}
 	}
 }
@@ -428,6 +473,29 @@ void format_cpu_state(simulator_t *simulator)
 	printf("  instr_ptr: 0x%04X\n", simulator->cpu.instr_ptr);
 }
 
+void format_cpu_state_to_file(simulator_t *simulator, FILE *output_file)
+{
+	fprintf(output_file, "Final registers\n");
+#define REGISTER(reg) fprintf(output_file, "  %s: 0x%04X (high: 0x%02X, low: 0x%02X) (%d)\n", \
+														 #reg,                                              \
+														 simulator->cpu.reg.x,                                         \
+														 simulator->cpu.reg.byte.h,                                    \
+														 simulator->cpu.reg.byte.l,                                    \
+														 simulator->cpu.reg.x);
+	GENERAL_REGISTERS
+#undef REGISTER
+
+#define REGISTER(reg) fprintf(output_file, "  %s: 0x%04X (%d)\n", \
+														 #reg,                  \
+														 simulator->cpu.reg,               \
+														 simulator->cpu.reg);
+	POINTER_REGISTERS
+#undef REGISTER
+
+	fprintf(output_file, "  flags: 0x%04X (zero: %d, sign: %d)\n", simulator->cpu.flags, (simulator->cpu.flags & FLAG_ZF) != 0, (simulator->cpu.flags & FLAG_SF) != 0);
+	fprintf(output_file, "  instr_ptr: 0x%04X\n", simulator->cpu.instr_ptr);
+}
+
 void format_memory_state(simulator_t *simulator)
 {
 	printf("Memory state\n");
@@ -436,6 +504,18 @@ void format_memory_state(simulator_t *simulator)
 		if (simulator->memory.data[i] != 0)
 		{
 			printf("  0x%04X (%d): 0x%04X (%d)\n", i, i, simulator->memory.data[i], simulator->memory.data[i]);
+		}
+	}
+}
+
+void format_memory_state_to_file(simulator_t *simulator, FILE *output_file)
+{
+	fprintf(output_file, "Memory state\n");
+	for (int i = 0; i < simulator->memory.last_used; i++)
+	{
+		if (simulator->memory.data[i] != 0)
+		{
+			fprintf(output_file, "  0x%04X (%d): 0x%04X (%d)\n", i, i, simulator->memory.data[i], simulator->memory.data[i]);
 		}
 	}
 }
@@ -760,7 +840,7 @@ instruction_t immed_to_regm(simulator_t *simulator) {
 instruction_t mov_immed_to_mem(simulator_t *simulator) {
 	decoder_t *decoder = simulator->decoder;
 	uint8_t byte = decoder->bin_buffer[simulator->cpu.instr_ptr];
-	uint8_t w_bit = (byte >> 1) & 0b1;
+	uint8_t w_bit = byte & 0b1;
 	advance_decoder(simulator);
 
 	byte = decoder->bin_buffer[simulator->cpu.instr_ptr];
@@ -769,7 +849,7 @@ instruction_t mov_immed_to_mem(simulator_t *simulator) {
 	uint8_t regm = byte & 0b111;
 
 	instruction_data_t instr = {.operation = OP_MOV,
-		.d_s_bit = 1,
+		.d_s_bit = 0,
 		.w_bit = w_bit,
 		.reg = reg,
 		.regm = regm};
@@ -1227,6 +1307,30 @@ void format_instruction(const instruction_t *instr) {
     // Default case - no size prefix needed
     else {
         printf("%s %s, %s", op_names[instr->op], dest_buf, src_buf);
+    }
+}
+
+void format_instruction_to_file(const instruction_t *instr, FILE *output_file) {
+    char dest_buf[64] = {0};
+    char src_buf[64] = {0};
+
+    // Format operands
+    format_operand(dest_buf, sizeof(dest_buf), &instr->dest);
+    format_operand(src_buf, sizeof(src_buf), &instr->src);
+    // Handle jump instructions (single operand)
+    if (instr->op == OP_JMP || instr->op == OP_JE || instr->op == OP_JNE ||
+        instr->op == OP_JL || instr->op == OP_JLE || instr->op == OP_JG ||
+        instr->op == OP_JGE) {
+        fprintf(output_file, "%s %s", op_names[instr->op], dest_buf);
+    }
+    // Only add size prefix for immediate to memory operations
+    else if (instr->src.type == OPERAND_IMMEDIATE && instr->dest.type == OPERAND_MEMORY) {
+        const char *size_ptr = instr->w_bit ? "word" : "byte";
+        fprintf(output_file, "%s %s %s, %s", op_names[instr->op], size_ptr, dest_buf, src_buf);
+    }
+    // Default case - no size prefix needed
+    else {
+        fprintf(output_file, "%s %s, %s", op_names[instr->op], dest_buf, src_buf);
     }
 }
 

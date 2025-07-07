@@ -1,0 +1,177 @@
+add bx, [bx+si]
+flags: 0x0040 (zero: 1, sign: 0)
+add bx, [bp]
+flags: 0x0040 (zero: 1, sign: 0)
+add si, 2
+flags: 0x0000 (zero: 0, sign: 0)
+SI: 0x0000 -> 0x0002 (2)
+add bp, 2
+flags: 0x0000 (zero: 0, sign: 0)
+BP: 0x0000 -> 0x0002 (2)
+add cx, 8
+flags: 0x0000 (zero: 0, sign: 0)
+CX: 0x0000 -> 0x0008 (8)
+add bx, [bp]
+flags: 0x0040 (zero: 1, sign: 0)
+add cx, [bx+2]
+flags: 0x0000 (zero: 0, sign: 0)
+add bh, [bp+si+4]
+flags: 0x0040 (zero: 1, sign: 0)
+add di, [bp+di+6]
+flags: 0x0040 (zero: 1, sign: 0)
+add [bx+si], bx
+flags: 0x0040 (zero: 1, sign: 0)
+add [bp], bx
+flags: 0x0000 (zero: 0, sign: 0)
+add [bp], bx
+flags: 0x0000 (zero: 0, sign: 0)
+add [bx+2], cx
+flags: 0x0000 (zero: 0, sign: 0)
+BX: 0x0000 -> 0x0008 (8)
+add [bp+si+4], bh
+flags: 0x0000 (zero: 0, sign: 0)
+add [bp+di+6], di
+flags: 0x0000 (zero: 0, sign: 0)
+add byte [bx], 34
+flags: 0x0000 (zero: 0, sign: 0)
+BX: 0x0008 -> 0x002A (42)
+add word [bp+si+1000], 29
+flags: 0x0000 (zero: 0, sign: 0)
+BP: 0x0002 -> 0x001F (31)
+add ax, [bp]
+flags: 0x0040 (zero: 1, sign: 0)
+add al, [bx+si]
+flags: 0x0040 (zero: 1, sign: 0)
+add ax, bx
+flags: 0x0000 (zero: 0, sign: 0)
+AX: 0x0000 -> 0x002A (42)
+add al, ah
+flags: 0x0000 (zero: 0, sign: 0)
+add ax, 1000
+flags: 0x0000 (zero: 0, sign: 0)
+AX: 0x002A -> 0x0412 (1042)
+add al, 226
+flags: 0x0000 (zero: 0, sign: 0)
+AL: 0x12 -> 0xF4 (244)
+add al, 9
+flags: 0x0000 (zero: 0, sign: 0)
+AL: 0xF4 -> 0xFD (253)
+sub bx, [bx+si]
+flags: 0x0000 (zero: 0, sign: 0)
+sub bx, [bp]
+flags: 0x0000 (zero: 0, sign: 0)
+sub si, 2
+flags: 0x0040 (zero: 1, sign: 0)
+SI: 0x0002 -> 0x0000 (0)
+sub bp, 2
+flags: 0x0000 (zero: 0, sign: 0)
+BP: 0x001F -> 0x001D (29)
+sub cx, 8
+flags: 0x0040 (zero: 1, sign: 0)
+CX: 0x0008 -> 0x0000 (0)
+sub bx, [bp]
+flags: 0x0000 (zero: 0, sign: 0)
+sub cx, [bx+2]
+flags: 0x0040 (zero: 1, sign: 0)
+sub bh, [bp+si+4]
+flags: 0x0040 (zero: 1, sign: 0)
+sub di, [bp+di+6]
+flags: 0x0040 (zero: 1, sign: 0)
+sub [bx+si], bx
+flags: 0x0040 (zero: 1, sign: 0)
+BX: 0x002A -> 0x0000 (0)
+sub [bp], bx
+flags: 0x0000 (zero: 0, sign: 0)
+sub [bp], bx
+flags: 0x0000 (zero: 0, sign: 0)
+sub [bx+2], cx
+flags: 0x0040 (zero: 1, sign: 0)
+sub [bp+si+4], bh
+flags: 0x0000 (zero: 0, sign: 0)
+sub [bp+di+6], di
+flags: 0x0000 (zero: 0, sign: 0)
+sub byte [bx], 34
+flags: 0x0080 (zero: 0, sign: 1)
+BX: 0x0000 -> 0xFFDE (65502)
+sub word [bx+di], 29
+flags: 0x0080 (zero: 0, sign: 1)
+BX: 0xFFDE -> 0xFFC1 (65473)
+sub ax, [bp]
+flags: 0x0000 (zero: 0, sign: 0)
+sub al, [bx+si]
+flags: 0x0000 (zero: 0, sign: 0)
+sub ax, bx
+flags: 0x0000 (zero: 0, sign: 0)
+AX: 0x04FD -> 0x053C (1340)
+sub al, ah
+flags: 0x0000 (zero: 0, sign: 0)
+AL: 0x3C -> 0x37 (55)
+sub ax, 1000
+flags: 0x0000 (zero: 0, sign: 0)
+AX: 0x0537 -> 0x014F (335)
+sub al, 226
+flags: 0x0080 (zero: 0, sign: 1)
+AL: 0x4F -> 0x6D (65389)
+sub al, 9
+flags: 0x0000 (zero: 0, sign: 0)
+AL: 0x6D -> 0x64 (100)
+cmp bx, [bx+si]
+flags: 0x0080 (zero: 0, sign: 1)
+cmp bx, [bp]
+flags: 0x0080 (zero: 0, sign: 1)
+cmp si, 2
+flags: 0x0080 (zero: 0, sign: 1)
+cmp bp, 2
+flags: 0x0000 (zero: 0, sign: 0)
+cmp cx, 8
+flags: 0x0080 (zero: 0, sign: 1)
+cmp bx, [bp]
+flags: 0x0080 (zero: 0, sign: 1)
+cmp cx, [bx+2]
+flags: 0x0040 (zero: 1, sign: 0)
+cmp bh, [bp+si+4]
+flags: 0x0000 (zero: 0, sign: 0)
+cmp di, [bp+di+6]
+flags: 0x0040 (zero: 1, sign: 0)
+cmp [bx+si], bx
+flags: 0x0040 (zero: 1, sign: 0)
+cmp [bp], bx
+flags: 0x0000 (zero: 0, sign: 0)
+cmp [bp], bx
+flags: 0x0000 (zero: 0, sign: 0)
+cmp [bx+2], cx
+flags: 0x0080 (zero: 0, sign: 1)
+cmp [bp+si+4], bh
+flags: 0x0080 (zero: 0, sign: 1)
+cmp [bp+di+6], di
+flags: 0x0000 (zero: 0, sign: 0)
+cmp byte [bx], 34
+flags: 0x0080 (zero: 0, sign: 1)
+cmp word [4834], 29
+flags: 0x0080 (zero: 0, sign: 1)
+cmp ax, [bp]
+flags: 0x0000 (zero: 0, sign: 0)
+cmp al, [bx+si]
+flags: 0x0000 (zero: 0, sign: 0)
+cmp ax, bx
+flags: 0x0000 (zero: 0, sign: 0)
+cmp al, ah
+flags: 0x0000 (zero: 0, sign: 0)
+cmp ax, 1000
+flags: 0x0080 (zero: 0, sign: 1)
+cmp al, 226
+flags: 0x0080 (zero: 0, sign: 1)
+cmp al, 9
+flags: 0x0000 (zero: 0, sign: 0)
+Final registers
+  ax: 0x0164 (high: 0x01, low: 0x64) (356)
+  bx: 0xFFC1 (high: 0xFF, low: 0xC1) (65473)
+  cx: 0x0000 (high: 0x00, low: 0x00) (0)
+  dx: 0x0000 (high: 0x00, low: 0x00) (0)
+  sp: 0x0000 (0)
+  bp: 0x001D (29)
+  si: 0x0000 (0)
+  di: 0x0000 (0)
+  flags: 0x0000 (zero: 0, sign: 0)
+  instr_ptr: 0x00C7
+Memory state

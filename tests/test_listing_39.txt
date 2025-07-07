@@ -1,0 +1,35 @@
+mov si, bx
+mov dh, al
+mov cl, 12
+CL: 0x00 -> 0x0C (12)
+mov ch, 244
+CH: 0x00 -> 0xF4 (244)
+mov cx, 12
+CX: 0xF40C -> 0x000C (12)
+mov cx, -12
+CX: 0x000C -> 0xFFF4 (65524)
+mov dx, 3948
+DX: 0x0000 -> 0x0F6C (3948)
+mov dx, -3948
+DX: 0x0F6C -> 0xF094 (61588)
+mov al, [bx+si]
+mov bx, [bp+di]
+mov dx, [bp]
+DX: 0xF094 -> 0x0000 (0)
+mov ah, [bx+si+4]
+mov al, [bx+si+4999]
+mov [bx+di], cx
+mov [bp+si], cl
+mov [bp], ch
+Final registers
+  ax: 0x0000 (high: 0x00, low: 0x00) (0)
+  bx: 0x0000 (high: 0x00, low: 0x00) (0)
+  cx: 0xFFF4 (high: 0xFF, low: 0xF4) (65524)
+  dx: 0x0000 (high: 0x00, low: 0x00) (0)
+  sp: 0x0000 (0)
+  bp: 0x0000 (0)
+  si: 0x0000 (0)
+  di: 0x0000 (0)
+  flags: 0x0000 (zero: 0, sign: 0)
+  instr_ptr: 0x0029
+Memory state

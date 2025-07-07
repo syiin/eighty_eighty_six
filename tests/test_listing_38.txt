@@ -1,0 +1,23 @@
+mov cx, bx
+mov ch, ah
+mov dx, bx
+mov si, bx
+mov bx, di
+mov al, cl
+mov ch, ch
+mov bx, ax
+mov bx, si
+mov sp, di
+mov bp, ax
+Final registers
+  ax: 0x0000 (high: 0x00, low: 0x00) (0)
+  bx: 0x0000 (high: 0x00, low: 0x00) (0)
+  cx: 0x0000 (high: 0x00, low: 0x00) (0)
+  dx: 0x0000 (high: 0x00, low: 0x00) (0)
+  sp: 0x0000 (0)
+  bp: 0x0000 (0)
+  si: 0x0000 (0)
+  di: 0x0000 (0)
+  flags: 0x0000 (zero: 0, sign: 0)
+  instr_ptr: 0x0016
+Memory state
